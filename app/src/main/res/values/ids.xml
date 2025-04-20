@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="action_profile" type="id" />
+    <item name="action_past_chats" type="id" />
+    <item name="nav_my_account" type="id" />
+    <item name="nav_my_professors" type="id" />
+    <item name="nav_my_reviews" type="id" />
+    <item name="professorsRecyclerView" type="id" />
+    <item name="imageView4" type="id" />
+    <item name="chatRecyclerView" type="id" />
+    <item name="messageEditText" type="id" />
+    <item name="sendButton" type="id" />
+    <item name="drawer_layout" type="id" />
+    <item name="nav_view" type="id" />
+    <item name="button" type="id" />
+</resources>
