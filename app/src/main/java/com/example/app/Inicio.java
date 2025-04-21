@@ -1,11 +1,16 @@
 package com.example.app;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -58,6 +63,20 @@ public class Inicio extends AppCompatActivity {
             return insets;
         });
 
+        TextView cuceiIA = findViewById(R.id.cuceiIA);
+
+        String fullText = "CUCEI IA";
+
+        SpannableString spannableString = new SpannableString(fullText);
+
+        spannableString.setSpan(new ForegroundColorSpan(Color.WHITE), 0, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        int lightblue = Color.parseColor("#0091EA");
+
+        spannableString.setSpan(new ForegroundColorSpan(lightblue), 6, 8, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        cuceiIA.setText(spannableString);
+
         mAuth = FirebaseAuth.getInstance();
 
         // Configuración de Firebase
@@ -101,6 +120,7 @@ public class Inicio extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
+                        //Guardar el usuario en la base de datos User currentUser = new User(user.getUid(), user.getDisplayName(), user.getEmail());
                         updateUI(user);
                     } else {
                         updateUI(null);
