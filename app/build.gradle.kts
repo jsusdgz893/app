@@ -1,5 +1,4 @@
 plugins {
-
     id("com.android.application")
     id("com.google.gms.google-services")
 }
@@ -64,5 +63,8 @@ dependencies {
     // Credentials API
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
+
+    // Añade las dependencias para cualquier otro producto de Firebase que desees
+    implementation("com.google.firebase:firebase-firestore-ktx")
 
 }

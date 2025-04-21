@@ -26,13 +26,19 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Map;
+import java.util.HashMap;
 
 public class Inicio extends AppCompatActivity {
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private Button google_sign_in;
 
@@ -42,6 +48,8 @@ public class Inicio extends AppCompatActivity {
     private FirebaseDatabase database;
     private GoogleSignInClient googleSignInClient;
     private int RC_SIGN_IN = 20;
+
+
 
     @Override
     protected void onStart() {
@@ -120,13 +128,28 @@ public class Inicio extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
-                        //Guardar el usuario en la base de datos User currentUser = new User(user.getUid(), user.getDisplayName(), user.getEmail());
+
+                        // Guardar el usuario en Firestore usando el correo como nombre del documento
+                        if (user != null && user.getEmail() != null) {
+                            Map<String, Object> userData = new HashMap<>();
+                            userData.put("uid", user.getUid());
+                            userData.put("nombre", user.getDisplayName());
+                            userData.put("correo", user.getEmail());
+                            userData.put("fotoURL", user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null);
+
+                            db.collection("usuarios").document(user.getUid())
+                                    .set(userData)
+                                    .addOnSuccessListener(aVoid -> Log.d("Firestore", "Usuario guardado correctamente con correo"))
+                                    .addOnFailureListener(e -> Log.e("Firestore", "Error al guardar usuario", e));
+                        }
+
                         updateUI(user);
                     } else {
                         updateUI(null);
                     }
                 });
     }
+
 
     private void updateUI(FirebaseUser user) {
         if (user != null) {
@@ -139,10 +162,4 @@ public class Inicio extends AppCompatActivity {
         }
     }
 
-
-
-
-
 }
-
-
