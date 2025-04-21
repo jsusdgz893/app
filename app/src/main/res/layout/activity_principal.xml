@@ -63,6 +63,17 @@
         </LinearLayout>
     </HorizontalScrollView>
 
+    <Button
+        android:id="@+id/btnLogOut"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom|end"
+        android:backgroundTint="#D50000"
+        android:text="Cerrar sesion"
+        android:textColor="#FFFFFF"
+        android:textColorLink="#FFFFFF"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/textViewMejorValorados"
         android:layout_width="match_parent"

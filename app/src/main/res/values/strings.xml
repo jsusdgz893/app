@@ -2,5 +2,6 @@
     <string name="app_name" translatable="false">app</string>
     <string name="navigation_drawer_open">\n</string>
     <string name="navigation_drawer_close">\n</string>
+    <string name="default_web_client_id">811442929857-6gk0vak1aq90lh4ir1odarbjaapio3p1.apps.googleusercontent.com</string>
 
 </resources>
