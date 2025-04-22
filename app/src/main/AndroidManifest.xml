@@ -27,10 +27,11 @@
             android:name=".SignUpActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".Inicio"
             android:exported="false" />
         <activity
-            android:name=".Inicio"
+            android:name=".MainActivity"
+            android:theme="@style/Base.Theme.App"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

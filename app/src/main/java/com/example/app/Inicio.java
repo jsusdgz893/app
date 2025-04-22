@@ -50,7 +50,6 @@ public class Inicio extends AppCompatActivity {
     private int RC_SIGN_IN = 20;
 
 
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -70,6 +69,8 @@ public class Inicio extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        progressBar = findViewById(R.id.progressBarLogin);
 
         TextView cuceiIA = findViewById(R.id.cuceiIA);
 
@@ -123,14 +124,17 @@ public class Inicio extends AppCompatActivity {
     }
 
     private void firebaseAuthWithGoogle(String idToken) {
+        progressBar.setVisibility(View.VISIBLE);
+        google_sign_in.setEnabled(false);
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        google_sign_in.setEnabled(true);
                         FirebaseUser user = mAuth.getCurrentUser();
-
-                        // Guardar el usuario en Firestore usando el correo como nombre del documento
-                        if (user != null && user.getEmail() != null) {
+                        if (isEmailallowed(user.getEmail())) {
+                            // Guardar el usuario en Firestore usando el correo como nombre del documento
                             Map<String, Object> userData = new HashMap<>();
                             userData.put("uid", user.getUid());
                             userData.put("nombre", user.getDisplayName());
@@ -141,9 +145,12 @@ public class Inicio extends AppCompatActivity {
                                     .set(userData)
                                     .addOnSuccessListener(aVoid -> Log.d("Firestore", "Usuario guardado correctamente con correo"))
                                     .addOnFailureListener(e -> Log.e("Firestore", "Error al guardar usuario", e));
+                            updateUI(user);
+                            Toast.makeText(Inicio.this, "Bienvenido " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                        } else {
+                            signOutInvalidUser(user);
+                            Toast.makeText(Inicio.this, "Solo es posible ingresar con un cuenta de google de la UDG", Toast.LENGTH_SHORT).show();
                         }
-
-                        updateUI(user);
                     } else {
                         updateUI(null);
                     }
@@ -157,9 +164,43 @@ public class Inicio extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            Toast.makeText(Inicio.this, "Autenticacion fallo",
+            Toast.makeText(Inicio.this, "Error en la autenticación",
                     Toast.LENGTH_SHORT).show();
         }
     }
 
+    private boolean isEmailallowed(String email) {
+        String allowed_domain = "@alumnos.udg.mx";
+        if (email != null) {
+            return email.endsWith(allowed_domain);
+        }
+        return false;
+    }
+
+    private void signOutInvalidUser(FirebaseUser user) {
+        if (user != null) {
+            user.delete()
+                    .addOnCompleteListener(task -> {
+                        googleSignInClient.signOut().addOnCompleteListener(task1 -> {
+                            mAuth.signOut();
+                            google_sign_in.setEnabled(true);
+                        });
+                    }).addOnFailureListener(e -> {
+                        Log.e("Auth", "Error al eliminar usuario", e);
+                        googleSignInClient.signOut();
+                        mAuth.signOut();
+                        google_sign_in.setEnabled(true);
+                        updateUI(null);
+                    });
+        } else {
+            googleSignInClient.signOut();
+            mAuth.signOut();
+            updateUI(null);
+        }
+    }
 }
+
+
+
+
+

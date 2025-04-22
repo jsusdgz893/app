@@ -2,7 +2,7 @@
 firebase-bom = "32.8.1"  # Versión actualizada del BOM
 play-services-auth = "20.7.0"
 credentials = "1.2.2"
-agp = "8.9.1"
+agp = "8.9.2"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
