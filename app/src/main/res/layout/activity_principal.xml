@@ -1,111 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:background="@color/black"
+    tools:context=".principal">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/searchView"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:iconifiedByDefault="false"
-            app:queryHint="Buscar..." />
-    </androidx.appcompat.widget.Toolbar>
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none">
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/gray"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:theme="@style/SearchViewStyle"
+                    app:iconifiedByDefault="false"
+                    app:queryHint="Buscar..." />
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <Button
+                    android:id="@+id/buttonInicio"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="Inicio"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/buttonMejorValorados"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="Mejor valorados"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/buttonPeorCalificados"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="Peor calificados"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/buttonBarcos"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Barcos"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Main Content (RecyclerViews, TextViews, etc.) -->
+        <TextView
+            android:id="@+id/textViewMejorValorados"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Mejor valorados"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewMejorValorados"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:padding="8dp"
+            tools:listitem="@layout/item_layout" />
 
-            <Button
-                android:id="@+id/buttonInicio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Inicio" />
+        <TextView
+            android:id="@+id/textViewRecomendaciones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Recomendaciones para mí"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-            <Button
-                android:id="@+id/buttonMejorValorados"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Mejor valorados" />
+    <!-- "Describe a tu profesor" Button (at the bottom) -->
+    <Button
+        android:id="@+id/btnDescribeProfessor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="80dp"
+        android:backgroundTint="@color/white"
+        android:text="Describe a tu profesor"
+        android:textColor="@color/black" />
 
-            <Button
-                android:id="@+id/buttonPeorCalificados"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Peor calificados" />
-
-            <Button
-                android:id="@+id/buttonBarcos"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Barcos" />
-        </LinearLayout>
-    </HorizontalScrollView>
-
+    <!-- "Cerrar sesión" Button (at the bottom right) -->
     <Button
         android:id="@+id/btnLogOut"
         android:layout_width="150dp"
         android:layout_height="50dp"
-        android:layout_gravity="bottom|end"
-        android:backgroundTint="#D50000"
-        android:text="Cerrar sesion"
-        android:textColor="#FFFFFF"
-        android:textColorLink="#FFFFFF"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@color/white"
+        android:text="Cerrar sesión"
+        android:textColor="@color/black"
         android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/textViewMejorValorados"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:text="Mejor valorados"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewMejorValorados"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        tools:listitem="@layout/item_layout" />
-
-    <TextView
-        android:id="@+id/textViewRecomendaciones"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:text="Recomendaciones para mí"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewRecomendaciones"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        tools:listitem="@layout/item_layout" />
-
-</LinearLayout>
+</RelativeLayout>

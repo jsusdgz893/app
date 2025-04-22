@@ -68,7 +68,20 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="229dp" />
+            android:layout_height="32dp" />
+
+        <ProgressBar
+            android:id="@+id/progressBarLogin"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="157dp"
+            android:backgroundTintMode="src_in"
+            android:progressBackgroundTint="#00C853"
+            android:visibility="invisible" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="32dp" />
 
         <TextView
             android:id="@+id/textView6"
