@@ -13,4 +13,6 @@
     <item name="drawer_layout" type="id" />
     <item name="nav_view" type="id" />
     <item name="button" type="id" />
+    <item name="spinnerProfesores" type="id" />
+    <item name="spinnerMaterias" type="id" />
 </resources>
