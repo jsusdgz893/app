@@ -62,24 +62,23 @@
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
-                <Spinner
-                    android:id="@+id/spinnerProfesores"
+                <AutoCompleteTextView
+                    android:id="@+id/autoCompleteProfesores"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
+                    android:hint="Selecciona o escribe el nombre del profesor" />
 
-                <Spinner
-                    android:id="@+id/spinnerMaterias"
+                <AutoCompleteTextView
+                    android:id="@+id/autoCompleteMaterias"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
-
+                    android:hint="Selecciona o escribe la materia" />
                 <EditText
                     android:id="@+id/editTextDescriptionProfessor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="Descripción (máx. 250 caracteres)"
+                    android:hint="Descripción o comentario (máx. 250 caracteres)"
                     android:maxLength="250"
                     android:textColor="@color/black"
                     android:textColorHint="@color/dark_gray"
