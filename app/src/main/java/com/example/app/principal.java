@@ -3,8 +3,11 @@ package com.example.app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -20,13 +23,22 @@ import com.google.firebase.auth.FirebaseAuth;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class principal extends AppCompatActivity {
 
-    private Button btnLogOut, btnDescribeProfessor, btnCancelForm;
+    private Button btnLogOut, btnDescribeProfessor, btnCancelForm, btnSaveForm;
+    private EditText editTextDescriptionProfessor;
+    private RatingBar ratingBarProfessor;
     private LinearLayout formDescribeProfessor;
     private GoogleSignInClient googleSignInClient;
     private DrawerLayout drawerLayout;
@@ -34,18 +46,20 @@ public class principal extends AppCompatActivity {
     private NavigationView navigationView;
     private Toolbar toolbar;
 
-    
 
-    private Spinner spinnerProfesores, spinnerMaterias;
+
+
+    private AutoCompleteTextView autoCompleteProfesores, autoCompleteMaterias;
     private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
-        spinnerProfesores = findViewById(R.id.spinnerProfesores);
-        spinnerMaterias = findViewById(R.id.spinnerMaterias);
+        autoCompleteProfesores = findViewById(R.id.autoCompleteProfesores);
+        autoCompleteMaterias = findViewById(R.id.autoCompleteMaterias);
         db = FirebaseFirestore.getInstance();
+
 
 
         loadProfesores();
@@ -68,11 +82,12 @@ public class principal extends AppCompatActivity {
             } else if (itemId == R.id.nav_profesores_opiniones) {
                 Toast.makeText(this, "Mis profesores y opiniones", Toast.LENGTH_SHORT).show();
             } else if (itemId == R.id.nav_soporte) {
-                Toast.makeText(this, "Soporte", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Abriendo Soporte", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, SoporteActivity.class));
             } else if (itemId == R.id.nav_configuracion) {
                 Toast.makeText(this, "Configuración", Toast.LENGTH_SHORT).show();
             } else if (itemId == R.id.nav_acerca) {
-                Toast.makeText(this, "Acerca de la app", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, AcercaActivity.class));
             }
             drawerLayout.closeDrawers();
             return true;
@@ -91,40 +106,108 @@ public class principal extends AppCompatActivity {
 
         btnLogOut.setOnClickListener(v -> logoutUser());
         btnDescribeProfessor.setOnClickListener(v -> toggleFormVisibility());
-        btnCancelForm.setOnClickListener(v -> formDescribeProfessor.setVisibility(View.GONE));
+        btnSaveForm = findViewById(R.id.btnSaveForm);
+        editTextDescriptionProfessor = findViewById(R.id.editTextDescriptionProfessor);
+        ratingBarProfessor = findViewById(R.id.ratingBarProfessor);
+
+        btnCancelForm.setOnClickListener(v -> {
+            limpiarCamposFormulario(); // limpiamos campos
+            formDescribeProfessor.setVisibility(View.GONE);
+            btnDescribeProfessor.setVisibility(View.VISIBLE);
+            btnLogOut.setVisibility(View.VISIBLE);
+        });
+
+        //para guardar la reseña
+        btnSaveForm.setOnClickListener(v -> {
+            String profesorSeleccionado = autoCompleteProfesores.getText().toString().trim();
+            String materiaSeleccionada = autoCompleteMaterias.getText().toString().trim();
+            String comentario = editTextDescriptionProfessor.getText().toString().trim();
+            float calificacion = ratingBarProfessor.getRating();
+
+            if (profesorSeleccionado.isEmpty() || materiaSeleccionada.isEmpty() || comentario.isEmpty() || calificacion == 0f) {
+                Toast.makeText(this, "Completa todos los campos y selecciona una calificación", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user == null) {
+                Toast.makeText(this, "Usuario no autenticado", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String idUsuario = user.getUid();
+
+            db.collection("profesores")
+                    .whereEqualTo("nombre", profesorSeleccionado)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            DocumentSnapshot profDoc = queryDocumentSnapshots.getDocuments().get(0);
+                            String idProfesor = profDoc.getId();
+
+                            Map<String, Object> resena = new HashMap<>();
+                            resena.put("comentario", comentario);
+                            resena.put("calificacion", calificacion);
+                            resena.put("id_usuario", idUsuario);
+                            resena.put("id_profesor", idProfesor);
+                            resena.put("materia", materiaSeleccionada);
+
+                            db.collection("resenas")
+                                    .add(resena)
+                                    .addOnSuccessListener(documentReference -> {
+                                        Toast.makeText(this, "Reseña enviada con éxito", Toast.LENGTH_SHORT).show();
+                                        limpiarCamposFormulario(); // limpiamos campos
+                                        formDescribeProfessor.setVisibility(View.GONE);
+                                        btnDescribeProfessor.setVisibility(View.VISIBLE);
+                                        btnLogOut.setVisibility(View.VISIBLE);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(this, "Error al enviar reseña", Toast.LENGTH_SHORT).show();
+                                    });
+
+                        } else {
+                            Toast.makeText(this, "Profesor no encontrado en la base de datos", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Error al buscar profesor", Toast.LENGTH_SHORT).show();
+                    });
+        });
     }
+
 
     private void loadProfesores() {
         CollectionReference profesoresRef = db.collection("profesores");
         profesoresRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                List<String> nombres = new ArrayList<>();
                 for (QueryDocumentSnapshot doc : task.getResult()) {
                     String nombre = doc.getString("nombre");
                     if (nombre != null) {
-                        adapter.add(nombre);
+                        nombres.add(nombre);
                     }
                 }
-                spinnerProfesores.setAdapter(adapter);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, nombres);
+                autoCompleteProfesores.setAdapter(adapter);
             } else {
                 Toast.makeText(this, "Error al cargar profesores", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
     private void loadMaterias() {
         CollectionReference materiasRef = db.collection("materias");
         materiasRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                List<String> nombres = new ArrayList<>();
                 for (QueryDocumentSnapshot doc : task.getResult()) {
                     String nombre = doc.getString("nombre");
                     if (nombre != null) {
-                        adapter.add(nombre);
+                        nombres.add(nombre);
                     }
                 }
-                spinnerMaterias.setAdapter(adapter);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, nombres);
+                autoCompleteMaterias.setAdapter(adapter);
             } else {
                 Toast.makeText(this, "Error al cargar materias", Toast.LENGTH_SHORT).show();
             }
@@ -141,13 +224,19 @@ public class principal extends AppCompatActivity {
         });
     }
 
+
     private void toggleFormVisibility() {
-        if (formDescribeProfessor.getVisibility() == View.GONE) {
-            formDescribeProfessor.setVisibility(View.VISIBLE);
-        } else {
-            formDescribeProfessor.setVisibility(View.GONE);
-        }
+        formDescribeProfessor.setVisibility(View.VISIBLE);
+        btnDescribeProfessor.setVisibility(View.GONE);
+        btnLogOut.setVisibility(View.GONE);
     }
+    private void limpiarCamposFormulario() {
+        autoCompleteProfesores.setText("");
+        autoCompleteMaterias.setText("");
+        editTextDescriptionProfessor.setText("");
+        ratingBarProfessor.setRating(0f);
+    }
+
 
 
 }

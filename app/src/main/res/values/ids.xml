@@ -15,4 +15,15 @@
     <item name="button" type="id" />
     <item name="spinnerProfesores" type="id" />
     <item name="spinnerMaterias" type="id" />
+    <item name="txtTitulo" type="id" />
+    <item name="txtTituloIA" type="id" />
+    <item name="txtCorreo" type="id" />
+    <item name="txtSoporte" type="id" />
+    <item name="cardMensaje" type="id" />
+    <item name="btnVolver" type="id" />
+    <item name="btnVolverAcerca" type="id" />
+    <item name="txtAcerca" type="id" />
+    <item name="cardDescripcion" type="id" />
+    <item name="layoutSocial" type="id" />
+    <item name="ytIcon" type="id" />
 </resources>
