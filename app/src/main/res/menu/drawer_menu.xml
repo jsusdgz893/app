@@ -1,0 +1,22 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_perfil"
+        android:title="Mi perfil"
+        android:icon="@drawable/alumnos" />
+    <item
+        android:id="@+id/nav_profesores_opiniones"
+        android:title="Mis profesores y opiniones"
+        android:icon="@drawable/profesores" />
+    <item
+        android:id="@+id/nav_soporte"
+        android:title="Soporte"
+        android:icon="@drawable/soporte" />
+    <item
+        android:id="@+id/nav_configuracion"
+        android:title="Configuración"
+        android:icon="@drawable/ajustes" />
+    <item
+        android:id="@+id/nav_acerca"
+        android:title="Acerca de la app"
+        android:icon="@drawable/acerca" />
+</menu>

@@ -1,111 +1,172 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".principal">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <!-- CONTENIDO PRINCIPAL -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/searchView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:iconifiedByDefault="false"
-            app:queryHint="Buscar..." />
-    </androidx.appcompat.widget.Toolbar>
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none">
+        android:layout_height="match_parent"
+        android:background="@color/black">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="8dp">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <Button
-                android:id="@+id/buttonInicio"
-                android:layout_width="wrap_content"
+            <!-- Toolbar -->
+            <com.google.android.material.appbar.AppBarLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Inicio" />
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-            <Button
-                android:id="@+id/buttonMejorValorados"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Mejor valorados" />
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="@color/black"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            </com.google.android.material.appbar.AppBarLayout>
 
-            <Button
-                android:id="@+id/buttonPeorCalificados"
-                android:layout_width="wrap_content"
+            <!-- Buscador -->
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/searchView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="Peor calificados" />
+                android:theme="@style/SearchViewStyle"
+                android:queryHint="Buscar..."
+                app:iconifiedByDefault="false" />
 
-            <Button
-                android:id="@+id/buttonBarcos"
-                android:layout_width="wrap_content"
+            <!-- FORMULARIO ACTUALIZADO -->
+            <LinearLayout
+                android:id="@+id/formDescribeProfessor"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Barcos" />
+                android:layout_margin="16dp"
+                android:background="@android:color/white"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Describe a tu profesor"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerProfesores"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp" />
+
+                <Spinner
+                    android:id="@+id/spinnerMaterias"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp" />
+
+                <EditText
+                    android:id="@+id/editTextDescriptionProfessor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Descripción (máx. 250 caracteres)"
+                    android:maxLength="250"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/dark_gray"
+                    android:inputType="textMultiLine"
+                    android:minLines="3"
+                    android:gravity="top|start" />
+
+                <RatingBar
+                    android:id="@+id/ratingBarProfessor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:numStars="5"
+                    android:stepSize="1.0" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnCancelForm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/black"
+                        android:text="Cancelar"
+                        android:textColor="@color/white" />
+
+                    <Button
+                        android:id="@+id/btnSaveForm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/black"
+                        android:text="Guardar"
+                        android:textColor="@color/white" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
-    </HorizontalScrollView>
 
-    <Button
-        android:id="@+id/btnLogOut"
-        android:layout_width="150dp"
-        android:layout_height="50dp"
-        android:layout_gravity="bottom|end"
-        android:backgroundTint="#D50000"
-        android:text="Cerrar sesion"
-        android:textColor="#FFFFFF"
-        android:textColorLink="#FFFFFF"
-        android:textStyle="bold" />
+        <!-- Botón "Describe a tu profesor" -->
+        <Button
+            android:id="@+id/btnDescribeProfessor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="80dp"
+            android:backgroundTint="@color/white"
+            android:text="Describe a tu profesor"
+            android:textColor="@color/black" />
 
-    <TextView
-        android:id="@+id/textViewMejorValorados"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:text="Mejor valorados"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <!-- Botón "Cerrar sesión" -->
+        <Button
+            android:id="@+id/btnLogOut"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="16dp"
+            android:backgroundTint="@color/white"
+            android:text="Cerrar sesión"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+    </RelativeLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewMejorValorados"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        tools:listitem="@layout/item_layout" />
-
-    <TextView
-        android:id="@+id/textViewRecomendaciones"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:text="Recomendaciones para mí"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+    <!-- MENÚ LATERAL -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/white"
+        app:menu="@menu/drawer_menu" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewRecomendaciones"
+        android:id="@+id/recyclerOpiniones"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:padding="8dp"
-        tools:listitem="@layout/item_layout" />
+        android:layout_marginTop="8dp"
+        android:scrollbars="vertical" />
 
-</LinearLayout>
+</androidx.drawerlayout.widget.DrawerLayout>
+
+
