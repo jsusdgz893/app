@@ -21,6 +21,9 @@
             android:name=".principal"
             android:exported="false" />
         <activity
+            android:name=".TeacherProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".ForgotPasswordActivity"
             android:exported="false" />
         <activity
