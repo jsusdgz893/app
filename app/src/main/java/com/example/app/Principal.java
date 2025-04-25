@@ -9,12 +9,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
+import androidx.appcompat.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -51,6 +54,12 @@ public class Principal extends AppCompatActivity {
 
     private AutoCompleteTextView autoCompleteProfesores, autoCompleteMaterias;
     private FirebaseFirestore db;
+
+    //para la busqueda del profesor
+    private androidx.appcompat.widget.SearchView searchView;
+    private RecyclerView recyclerResultadosBusqueda;
+    private List<Map<String, Object>> listaProfesores = new ArrayList<>();
+    private SearchAdapter searchAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +101,11 @@ public class Principal extends AppCompatActivity {
             drawerLayout.closeDrawers();
             return true;
         });
+
+      //para buscar profesor
+        setupSearchView();
+
+
         // Google Sign-In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -238,5 +252,72 @@ public class Principal extends AppCompatActivity {
 
 
 
+    private void setupSearchView() {
+        searchView = findViewById(R.id.searchView);
+        recyclerResultadosBusqueda = findViewById(R.id.recyclerResultadosBusqueda);
+
+
+        // Configurar RecyclerView
+        recyclerResultadosBusqueda.setLayoutManager(new LinearLayoutManager(this));
+
+        searchAdapter = new SearchAdapter(listaProfesores, profesor -> {
+            // Aquí manejaremos el click en un profesor (lo implementaremos después)
+            String idProfesor = (String) profesor.get("id");
+            String nombreProfesor = (String) profesor.get("nombre");
+            // Ir a TeacherProfileActivity con los datos del profesor
+        });
+        recyclerResultadosBusqueda.setAdapter(searchAdapter);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                buscarProfesores(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    recyclerResultadosBusqueda.setVisibility(View.GONE);
+                }
+                return false;
+            }
+        });
+    }
+
+    private void buscarProfesores(String nombre) {
+        // Convertir la búsqueda a minúsculas para hacerla case-insensitive
+        String busqueda = nombre.toLowerCase();
+
+        db.collection("profesores")
+               .orderBy("nombre")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        listaProfesores.clear();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String nombreProfesor = document.getString("nombre");
+                            if (nombreProfesor != null && nombreProfesor.toLowerCase().contains(busqueda)) {
+                                Map<String, Object> profesor = new HashMap<>();
+                                profesor.put("id", document.getId());
+                                profesor.put("nombre", nombreProfesor);
+                                // Agrega más campos si los necesitas
+                                listaProfesores.add(profesor);
+                            }
+                        }
+
+                        if (listaProfesores.isEmpty()) {
+                            Toast.makeText(this, "No se encontraron profesores", Toast.LENGTH_SHORT).show();
+                            recyclerResultadosBusqueda.setVisibility(View.GONE);
+                        } else {
+                            searchAdapter.notifyDataSetChanged();
+                            recyclerResultadosBusqueda.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        Toast.makeText(this, "Error al buscar profesores", Toast.LENGTH_SHORT).show();
+                        Log.e("Firestore", "Error al buscar profesores", task.getException());
+                    }
+                });
+    }
 }
 
