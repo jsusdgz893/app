@@ -18,7 +18,7 @@
         android:theme="@style/Base.Theme.App"
         tools:targetApi="31">
         <activity
-            android:name=".principal"
+            android:name=".Principal"
             android:exported="false" />
         <activity
             android:name=".TeacherProfileActivity"
@@ -44,6 +44,10 @@
 
         <activity
             android:name=".SoporteActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AcercaActivity"
             android:exported="false" />
 
         <meta-data
