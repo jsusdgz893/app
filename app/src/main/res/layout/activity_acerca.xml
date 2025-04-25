@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@android:color/black">
+
+    <!-- Título CUCEI -->
+    <TextView
+        android:id="@+id/txtTitulo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CUCEI "
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- Título IA -->
+    <TextView
+        android:id="@+id/txtTituloIA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="IA"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#007BFF"
+        app:layout_constraintTop_toTopOf="@id/txtTitulo"
+        app:layout_constraintStart_toEndOf="@id/txtTitulo"/>
+
+    <!-- Subtítulo Acerca de CUCEI IA -->
+    <TextView
+        android:id="@+id/txtAcerca"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Acerca de\nCUCEI IA"
+        android:textSize="18sp"
+        android:textColor="#BBBBBB"
+        app:layout_constraintTop_toBottomOf="@id/txtTitulo"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <!-- CardView con descripción -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardDescripcion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#1E1E1E"
+        app:layout_constraintTop_toBottomOf="@id/txtAcerca"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Esta aplicación permite a los estudiantes compartir y consultar reseñas sobre profesores de diversas instituciones académicas. Nuestro objetivo es brindar una plataforma transparente y confiable para ayudar a los alumnos a tomar mejores decisiones sobre sus clases."
+            android:textSize="16sp"
+            android:textColor="#FFFFFF" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Iconos sociales -->
+    <LinearLayout
+        android:id="@+id/layoutSocial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/cardDescripcion"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    </LinearLayout>
+
+    <!-- Dirección -->
+    <TextView
+        android:id="@+id/txtDireccion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Blvd. Marcelino García Barragán #1421, esq Calzada"
+        android:textColor="#BBBBBB"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/layoutSocial"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Botón Volver -->
+    <Button
+        android:id="@+id/btnVolverAcerca"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Volver"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="#007BFF"
+        android:textColor="#FFFFFF"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
