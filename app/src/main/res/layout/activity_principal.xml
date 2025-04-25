@@ -7,7 +7,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".principal">
+    tools:context=".Principal">
 
     <!-- CONTENIDO PRINCIPAL -->
     <RelativeLayout
@@ -122,16 +122,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Botón "Describe a tu profesor" -->
-        <Button
-            android:id="@+id/btnDescribeProfessor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="80dp"
-            android:backgroundTint="@color/white"
-            android:text="Describe a tu profesor"
-            android:textColor="@color/black" />
+
 
         <!-- Botón "Cerrar sesión" -->
         <Button
@@ -146,6 +137,25 @@
             android:text="Cerrar sesión"
             android:textColor="@color/black"
             android:textStyle="bold" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerOpiniones"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:layout_marginTop="8dp"
+            android:scrollbars="vertical" />
+
+        <!-- Botón "Describe a tu profesor" -->
+        <Button
+            android:id="@+id/btnDescribeProfessor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="80dp"
+            android:backgroundTint="@color/white"
+            android:text="Describe a tu profesor"
+            android:textColor="@color/black" />
     </RelativeLayout>
 
     <!-- MENÚ LATERAL -->
@@ -157,14 +167,7 @@
         android:background="@color/white"
         app:menu="@menu/drawer_menu" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerOpiniones"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp"
-        android:layout_marginTop="8dp"
-        android:scrollbars="vertical" />
+
 
 </androidx.drawerlayout.widget.DrawerLayout>
 

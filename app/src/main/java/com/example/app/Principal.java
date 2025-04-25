@@ -2,6 +2,7 @@ package com.example.app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -21,7 +22,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class principal extends AppCompatActivity {
+public class Principal extends AppCompatActivity {
 
     private Button btnLogOut, btnDescribeProfessor, btnCancelForm, btnSaveForm;
     private EditText editTextDescriptionProfessor;
@@ -76,13 +76,13 @@ public class principal extends AppCompatActivity {
 
         // Menú navegación
         navigationView.setNavigationItemSelectedListener(item -> {
+
             int itemId = item.getItemId();
             if (itemId == R.id.nav_perfil) {
                 Toast.makeText(this, "Mi perfil", Toast.LENGTH_SHORT).show();
             } else if (itemId == R.id.nav_profesores_opiniones) {
                 Toast.makeText(this, "Mis profesores y opiniones", Toast.LENGTH_SHORT).show();
             } else if (itemId == R.id.nav_soporte) {
-                //Toast.makeText(this, "Abriendo Soporte", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, SoporteActivity.class));
             } else if (itemId == R.id.nav_configuracion) {
                 Toast.makeText(this, "Configuración", Toast.LENGTH_SHORT).show();
@@ -92,7 +92,6 @@ public class principal extends AppCompatActivity {
             drawerLayout.closeDrawers();
             return true;
         });
-
         // Google Sign-In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
