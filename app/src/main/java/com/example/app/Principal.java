@@ -94,7 +94,7 @@ public class Principal extends AppCompatActivity {
             } else if (itemId == R.id.nav_soporte) {
                 startActivity(new Intent(this, SoporteActivity.class));
             } else if (itemId == R.id.nav_configuracion) {
-                Toast.makeText(this, "Configuración", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, ConfiguracionActivity.class));
             } else if (itemId == R.id.nav_acerca) {
                 startActivity(new Intent(this, AcercaActivity.class));
             }

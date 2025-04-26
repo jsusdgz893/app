@@ -23,7 +23,7 @@ public class AcercaActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Volver a MainActivity
-                Intent intent = new Intent(AcercaActivity.this, MainActivity.class);
+                Intent intent = new Intent(AcercaActivity.this,Inicio.class);
                 startActivity(intent);
                 finish(); // Opcional: Cierra esta ventana
             }

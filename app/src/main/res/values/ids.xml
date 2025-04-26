@@ -26,4 +26,12 @@
     <item name="cardDescripcion" type="id" />
     <item name="layoutSocial" type="id" />
     <item name="ytIcon" type="id" />
+    <item name="switchTema" type="id" />
+    <item name="switchWifi" type="id" />
+    <item name="switchAnonimo" type="id" />
+    <item name="switchNotificaciones" type="id" />
+    <item name="spinnerIdioma" type="id" />
+    <item name="btnCerrarSesionConfig" type="id" />
+    <item name="btnVolverConfig" type="id" />
+    <item name="txtEliminarCuenta" type="id" />
 </resources>
