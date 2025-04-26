@@ -251,7 +251,7 @@ public class Principal extends AppCompatActivity {
     }
 
 
-
+//para la busqueda de profesor
     private void setupSearchView() {
         searchView = findViewById(R.id.searchView);
         recyclerResultadosBusqueda = findViewById(R.id.recyclerResultadosBusqueda);
@@ -260,11 +260,12 @@ public class Principal extends AppCompatActivity {
         // Configurar RecyclerView
         recyclerResultadosBusqueda.setLayoutManager(new LinearLayoutManager(this));
 
+
         searchAdapter = new SearchAdapter(listaProfesores, profesor -> {
-            // Aquí manejaremos el click en un profesor (lo implementaremos después)
-            String idProfesor = (String) profesor.get("id");
-            String nombreProfesor = (String) profesor.get("nombre");
-            // Ir a TeacherProfileActivity con los datos del profesor
+            Intent intent = new Intent(Principal.this, TeacherProfileActivity.class);
+            intent.putExtra("id_profesor", (String) profesor.get("id"));
+            intent.putExtra("nombre_profesor", (String) profesor.get("nombre"));
+            startActivity(intent);
         });
         recyclerResultadosBusqueda.setAdapter(searchAdapter);
 
@@ -301,7 +302,7 @@ public class Principal extends AppCompatActivity {
                                 Map<String, Object> profesor = new HashMap<>();
                                 profesor.put("id", document.getId());
                                 profesor.put("nombre", nombreProfesor);
-                                // Agrega más campos si los necesitas
+                                // Agregar más campos si se necesitan despues
                                 listaProfesores.add(profesor);
                             }
                         }
