@@ -3,8 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -17,6 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.App"
         tools:targetApi="31">
+        <activity
+            android:name=".MisOpiniones"
+            android:exported="false" />
         <activity
             android:name=".Principal"
             android:exported="false" />
@@ -41,11 +42,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".SoporteActivity"
             android:exported="false" />
-
         <activity
             android:name=".AcercaActivity"
             android:exported="false" />

@@ -90,7 +90,7 @@ public class Principal extends AppCompatActivity {
             if (itemId == R.id.nav_perfil) {
                 Toast.makeText(this, "Mi perfil", Toast.LENGTH_SHORT).show();
             } else if (itemId == R.id.nav_profesores_opiniones) {
-                Toast.makeText(this, "Mis profesores y opiniones", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, MisOpiniones.class));
             } else if (itemId == R.id.nav_soporte) {
                 startActivity(new Intent(this, SoporteActivity.class));
             } else if (itemId == R.id.nav_configuracion) {
