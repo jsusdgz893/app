@@ -8,13 +8,16 @@ public class Reseña {
     private String idUsuario;
     private String materia;
 
+    private String idResenia;
+
     // Constructor
-    public Reseña(double calificacion, String comentario, String idProfesor, String idUsuario, String materia) {
+    public Reseña(double calificacion, String comentario, String idProfesor, String idUsuario, String materia,String idResenia) {
         this.calificacion = calificacion;
         this.comentario = comentario;
         this.idProfesor = idProfesor;
         this.idUsuario = idUsuario;
         this.materia = materia;
+        this.idResenia = idResenia;
     }
 
     // Getters
@@ -37,6 +40,7 @@ public class Reseña {
     public String getMateria() {
         return materia;
     }
+    public String getIdResenia(){return idResenia; }
 
     // Setters
     public void setCalificacion(double calificacion) {
@@ -59,6 +63,8 @@ public class Reseña {
         this.materia = materia;
     }
 
+    public void setIdResenia(String idResenia){this.idResenia = idResenia;}
+
     // Método para mostrar los datos de la reseña
     @Override
     public String toString() {
@@ -68,6 +74,7 @@ public class Reseña {
                 ", idProfesor='" + idProfesor + '\'' +
                 ", idUsuario='" + idUsuario + '\'' +
                 ", materia='" + materia + '\'' +
+                ", IdResenia='" + idResenia + '\'' +
                 '}';
     }
 }
