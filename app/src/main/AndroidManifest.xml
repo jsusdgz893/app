@@ -15,6 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.App"
         tools:targetApi="31">
+
         <activity
             android:name=".MisOpiniones"
             android:exported="false" />
@@ -30,32 +31,34 @@
         <activity
             android:name=".SignUpActivity"
             android:exported="false" />
+
+        <!-- MainActivity es ahora la pantalla inicial -->
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Inicio"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".Inicio"
+            android:exported="false" />
+
         <activity
             android:name=".SoporteActivity"
             android:exported="false" />
         <activity
             android:name=".AcercaActivity"
             android:exported="false" />
+        <activity
+            android:name=".ConfiguracionActivity"
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
-        <activity
-            android:name=".ConfiguracionActivity"
-            android:exported="false" />
     </application>
 
 </manifest>

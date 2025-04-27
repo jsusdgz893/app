@@ -174,7 +174,9 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="@color/white"
-        app:menu="@menu/drawer_menu" />
+        app:itemIconSize="24dp"
+        app:menu="@menu/drawer_menu"
+        app:itemIconTint="@null" />
 
 
 
