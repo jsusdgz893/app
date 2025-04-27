@@ -1,5 +1,6 @@
 package com.example.app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +29,7 @@ public class MisOpiniones extends AppCompatActivity implements ReseñaAdapter.On
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private ConstraintLayout cuadroEditar;
+    private Button btnVolver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +64,15 @@ public class MisOpiniones extends AppCompatActivity implements ReseñaAdapter.On
         // Configura el listener para ocultar el cuadroEditar
         btnCerrar.setOnClickListener(v -> {
             cuadroEditar.setVisibility(View.GONE); // Oculta el cuadro de edición
+        });
+        btnVolver = findViewById(R.id.btnVolverOpiniones);
+
+        btnVolver.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Volver directamente a la actividad anterior
+                onBackPressed(); // Llama al método que maneja el retroceso
+            }
         });
 
 

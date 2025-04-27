@@ -22,10 +22,8 @@ public class AcercaActivity extends AppCompatActivity {
         btnVolver.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Volver a MainActivity
-                Intent intent = new Intent(AcercaActivity.this,Inicio.class);
-                startActivity(intent);
-                finish(); // Opcional: Cierra esta ventana
+                // Volver directamente a la actividad anterior
+                onBackPressed(); // Llama al método que maneja el retroceso
             }
         });
     }

@@ -2,6 +2,7 @@ package com.example.app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,9 +46,12 @@ public class ConfiguracionActivity extends AppCompatActivity {
         });
 
         // Volver al principal
-        btnVolverPrincipal.setOnClickListener(v -> {
-            startActivity(new Intent(this, Principal.class));
-            finish();
+        btnVolverPrincipal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Volver directamente a la actividad anterior
+                onBackPressed(); // Llama al método que maneja el retroceso
+            }
         });
 
         // Ir a SoporteActivity

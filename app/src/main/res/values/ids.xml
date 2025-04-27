@@ -21,7 +21,7 @@
     <item name="txtSoporte" type="id" />
     <item name="cardMensaje" type="id" />
     <item name="btnVolver" type="id" />
-    <item name="btnVolverAcerca" type="id" />
+    <item name="btnVolverOpiniones" type="id" />
     <item name="txtAcerca" type="id" />
     <item name="cardDescripcion" type="id" />
     <item name="layoutSocial" type="id" />
