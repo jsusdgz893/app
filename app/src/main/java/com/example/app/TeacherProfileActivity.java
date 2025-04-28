@@ -17,11 +17,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 public class TeacherProfileActivity extends AppCompatActivity {
-    private TextView tvNombreProfesor;
+    private TextView tvNombreProfesor,tvCalPromedio;//linea agregada
     private ListView listViewResenas;
     private FirebaseFirestore db;
     private String idProfesor, nombreProfesor;
@@ -37,8 +38,10 @@ public class TeacherProfileActivity extends AppCompatActivity {
 
         tvNombreProfesor = findViewById(R.id.textView);
         listViewResenas = findViewById(R.id.listViewResenas);
-        tvNombreProfesor.setText(nombreProfesor);
 
+        tvCalPromedio = findViewById(R.id.tvCalPromedio);//linea agregada
+
+        tvNombreProfesor.setText(nombreProfesor);
         cargarResenasDelProfesor();
 
         findViewById(R.id.backButtonTeacherProfile).setOnClickListener(v -> finish());
@@ -51,14 +54,31 @@ public class TeacherProfileActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         List<Map<String, Object>> resenas = new ArrayList<>();
+                        int totalResenias=0;//linea agregada
+                        float sumaCalificaciones=0;//linea agregada
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
+                            Double calificacion = document.getDouble("calificacion");//linea agregada
+                            totalResenias++;//linea agregada
+                            sumaCalificaciones+=calificacion;//linea agregada
                             Map<String, Object> resena = new HashMap<>();
                             resena.put("materia", document.getString("materia"));
-                            resena.put("calificacion", document.getDouble("calificacion"));
+                            resena.put("calificacion", calificacion);
                             resena.put("comentario", document.getString("comentario"));
                             resenas.add(resena);
                         }
+
+                        // Calcular y mostrar promedio
+                        if (totalResenias > 0) {
+                            float promedio = sumaCalificaciones / totalResenias;
+                            String promedioFormateado = String.format(Locale.getDefault(), "%.1f", promedio);
+                            tvCalPromedio.setText(String.format("Calificación promedio: ⭐ %s/5 (%d reseñas)",
+                                    promedioFormateado, totalResenias));
+                        } else {
+                            tvCalPromedio.setText("Calificación promedio: Sin reseñas aún");
+                        }
+
+
 
                         ResenaAdapter adapter = new ResenaAdapter(this, resenas);
                         listViewResenas.setAdapter(adapter);

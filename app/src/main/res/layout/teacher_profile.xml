@@ -54,6 +54,17 @@
                 android:textStyle="bold"/>
 
             <Space android:layout_height="14dp" android:layout_width="match_parent"/>
+            <TextView
+                android:id="@+id/tvCalPromedio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
+                android:text="Calificación promedio: "
+                android:textColor="#FFD700"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
 
             <TextView
                 android:id="@+id/textView3"
