@@ -36,6 +36,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import android.widget.ImageView;
+import android.widget.TextView;
+
+
 
 public class Principal extends AppCompatActivity {
 
@@ -65,6 +71,9 @@ public class Principal extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
+
+
+
         autoCompleteProfesores = findViewById(R.id.autoCompleteProfesores);
         autoCompleteMaterias = findViewById(R.id.autoCompleteMaterias);
         db = FirebaseFirestore.getInstance();
@@ -79,6 +88,27 @@ public class Principal extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.navigation_view);
+        // Obtener los elementos del header
+        View headerView = navigationView.getHeaderView(0);
+        ImageView imageViewProfile = headerView.findViewById(R.id.imageViewProfile);
+        TextView textViewName = headerView.findViewById(R.id.textViewName);
+        TextView textViewEmail = headerView.findViewById(R.id.textViewEmail);
+
+// Obtener información del usuario actual
+        AtomicReference<FirebaseUser> user = new AtomicReference<>(FirebaseAuth.getInstance().getCurrentUser());
+        if (user.get() != null) {
+            String name = user.get().getDisplayName();
+            String email = user.get().getEmail();
+            if (name != null) {
+                textViewName.setText(name);
+            }
+            if (email != null) {
+                textViewEmail.setText(email);
+            }
+
+
+        }
+
         toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
@@ -87,9 +117,8 @@ public class Principal extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(item -> {
 
             int itemId = item.getItemId();
-            if (itemId == R.id.nav_perfil) {
-                Toast.makeText(this, "Mi perfil", Toast.LENGTH_SHORT).show();
-            } else if (itemId == R.id.nav_profesores_opiniones) {
+
+            if (itemId == R.id.nav_profesores_opiniones) {
                 startActivity(new Intent(this, MisOpiniones.class));
             } else if (itemId == R.id.nav_soporte) {
                 startActivity(new Intent(this, SoporteActivity.class));
@@ -142,13 +171,13 @@ public class Principal extends AppCompatActivity {
                 return;
             }
 
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            if (user == null) {
+            user.set(FirebaseAuth.getInstance().getCurrentUser());
+            if (user.get() == null) {
                 Toast.makeText(this, "Usuario no autenticado", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            String idUsuario = user.getUid();
+            String idUsuario = user.get().getUid();
 
             db.collection("profesores")
                     .whereEqualTo("nombre", profesorSeleccionado)

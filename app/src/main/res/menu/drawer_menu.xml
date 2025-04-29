@@ -1,31 +1,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/nav_perfil"
-        android:title="Mi perfil"
-        android:icon="@drawable/alumnos"
-        android:titleTextColor="@color/black" /> <!-- Cambia el color del texto aquí -->
+
 
     <item
         android:id="@+id/nav_profesores_opiniones"
         android:title="Mis profesores y opiniones"
-        android:icon="@drawable/profesores"
-        android:titleTextColor="@color/black" /> <!-- Cambia el color del texto aquí -->
+        android:icon="@android:drawable/ic_menu_agenda" />
 
     <item
         android:id="@+id/nav_soporte"
         android:title="Soporte"
-        android:icon="@drawable/soporte"
-        android:titleTextColor="@color/black" /> <!-- Cambia el color del texto aquí -->
+        android:icon="@android:drawable/ic_menu_help" />
 
     <item
         android:id="@+id/nav_configuracion"
         android:title="Configuración"
-        android:icon="@drawable/ajustes"
-        android:titleTextColor="@color/black" /> <!-- Cambia el color del texto aquí -->
+        android:icon="@android:drawable/ic_menu_preferences" />
 
     <item
         android:id="@+id/nav_acerca"
         android:title="Acerca de la app"
-        android:icon="@drawable/acerca"
-        android:titleTextColor="@color/black" /> <!-- Cambia el color del texto aquí -->
+        android:icon="@android:drawable/ic_menu_info_details" />
 </menu>

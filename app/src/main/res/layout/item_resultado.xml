@@ -62,13 +62,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
+                android:backgroundTint="#007BFF"
+                android:textColor="@color/white"
                 android:text="Editar" />
 
             <Button
                 android:id="@+id/btnEliminar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#007BFF"
+                android:textColor="@color/white"
                 android:text="Eliminar" />
+
         </LinearLayout>
 
     </LinearLayout>
