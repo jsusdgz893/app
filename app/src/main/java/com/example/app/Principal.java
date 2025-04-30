@@ -29,6 +29,7 @@ import android.widget.ArrayAdapter;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -67,6 +68,11 @@ public class Principal extends AppCompatActivity {
     private List<Map<String, Object>> listaProfesores = new ArrayList<>();
     private SearchAdapter searchAdapter;
 
+    //para que cada profesor tenga sus materias
+    private List<String> materiasDelProfesorIds = new ArrayList<>(); // Almacena IDs
+    private Map<String, String> mapMaterias = new HashMap<>(); // ID -> Nombre
+    private ArrayAdapter<String> materiasAdapter; // Adaptador específico para materias
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,6 +94,13 @@ public class Principal extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.navigation_view);
+
+        //para que cada profesor tenga sus materias
+        autoCompleteMaterias.setEnabled(false); // Deshabilitar inicialmente
+        materiasAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line);
+        autoCompleteMaterias.setAdapter(materiasAdapter);
+
+
         // Obtener los elementos del header
         View headerView = navigationView.getHeaderView(0);
         ImageView imageViewProfile = headerView.findViewById(R.id.imageViewProfile);
@@ -158,15 +171,22 @@ public class Principal extends AppCompatActivity {
             btnDescribeProfessor.setVisibility(View.VISIBLE);
             btnLogOut.setVisibility(View.VISIBLE);
         });
-
+        //cargar materias del profesor seleccionado
+        autoCompleteProfesores.setOnItemClickListener((parent, view, position, id) -> {
+            String nombreProfesor = (String) parent.getItemAtPosition(position);
+            cargarMateriasDelProfesor(nombreProfesor);
+        });
         //para guardar la reseña
         btnSaveForm.setOnClickListener(v -> {
             String profesorSeleccionado = autoCompleteProfesores.getText().toString().trim();
-            String materiaSeleccionada = autoCompleteMaterias.getText().toString().trim();
             String comentario = editTextDescriptionProfessor.getText().toString().trim();
             float calificacion = ratingBarProfessor.getRating();
 
-            if (profesorSeleccionado.isEmpty() || materiaSeleccionada.isEmpty() || comentario.isEmpty() || calificacion == 0f) {
+            String nombreMateriaSeleccionada = autoCompleteMaterias.getText().toString().trim();
+
+
+            // Guardar normalmente nombreMateriaSeleccionada
+            if (profesorSeleccionado.isEmpty() || nombreMateriaSeleccionada.isEmpty() || comentario.isEmpty() || calificacion == 0f) {
                 Toast.makeText(this, "Completa todos los campos y selecciona una calificación", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -192,7 +212,7 @@ public class Principal extends AppCompatActivity {
                             resena.put("calificacion", calificacion);
                             resena.put("id_usuario", idUsuario);
                             resena.put("id_profesor", idProfesor);
-                            resena.put("materia", materiaSeleccionada);
+                            resena.put("materia", nombreMateriaSeleccionada);
 
                             db.collection("resenas")
                                     .add(resena)
@@ -229,10 +249,16 @@ public class Principal extends AppCompatActivity {
                         nombres.add(nombre);
                     }
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, nombres);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                        android.R.layout.simple_dropdown_item_1line, nombres);
                 autoCompleteProfesores.setAdapter(adapter);
-            } else {
-                Toast.makeText(this, "Error al cargar profesores", Toast.LENGTH_SHORT).show();
+
+                // Listener para cuando seleccionen un profesor
+                autoCompleteProfesores.setOnItemClickListener((parent, view, position, id) -> {
+                    String nombreProfesor = (String) parent.getItemAtPosition(position);
+                    cargarMateriasDelProfesor(nombreProfesor);
+                    autoCompleteMaterias.setText(""); // Limpiar selección previa
+                });
             }
         });
     }
@@ -277,6 +303,8 @@ public class Principal extends AppCompatActivity {
         autoCompleteMaterias.setText("");
         editTextDescriptionProfessor.setText("");
         ratingBarProfessor.setRating(0f);
+        autoCompleteMaterias.setEnabled(false);
+        materiasAdapter.clear();
     }
 
 
@@ -349,5 +377,51 @@ public class Principal extends AppCompatActivity {
                     }
                 });
     }
+
+    //para que cada profesor tenga sus materias
+    private void cargarMateriasDelProfesor(String nombreProfesor) {
+        db.collection("profesores")
+                .whereEqualTo("nombre", nombreProfesor)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        materiasDelProfesorIds = (List<String>) task.getResult().getDocuments().get(0).get("materias");
+                        //validar que tenga materias el profesor
+                        if (materiasDelProfesorIds != null && !materiasDelProfesorIds.isEmpty()) {
+                            // 1. Limpiar el campo
+                            autoCompleteMaterias.setText("");
+
+                            // 2. Cargar SOLO las materias válidas
+                            db.collection("materias")
+                                    .whereIn(FieldPath.documentId(), materiasDelProfesorIds)
+                                    .get()
+                                    .addOnCompleteListener(materiasTask -> {
+                                        if (materiasTask.isSuccessful()) {
+                                            List<String> nombresMaterias = new ArrayList<>();
+                                            for (QueryDocumentSnapshot doc : materiasTask.getResult()) {
+                                                nombresMaterias.add(doc.getString("nombre"));
+                                            }
+
+                                            // 3. Usar un adaptador NUEVO (no el global)
+                                            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                                                    Principal.this,
+                                                    android.R.layout.simple_dropdown_item_1line,
+                                                    nombresMaterias
+                                            );
+                                            autoCompleteMaterias.setAdapter(adapter);
+                                            autoCompleteMaterias.setEnabled(true);
+                                            autoCompleteMaterias.setFocusable(true);
+                                        }
+                                    });
+                        } else {
+                            Toast.makeText(this, "Este profesor no tiene materias asignadas aún", Toast.LENGTH_SHORT).show();
+                            autoCompleteMaterias.setEnabled(false);
+                        }
+
+                    }
+                });
+    }
+
+
 }
 
