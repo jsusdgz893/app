@@ -84,7 +84,7 @@
                     android:id="@+id/autoCompleteMaterias"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Selecciona o escribe la materia" />
+                    android:hint="Selecciona o escribe la materia después de seleccionar al profesor" />
                 <EditText
                     android:id="@+id/editTextDescriptionProfessor"
                     android:layout_width="match_parent"
