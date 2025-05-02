@@ -154,12 +154,12 @@ public class Principal extends AppCompatActivity {
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        btnLogOut = findViewById(R.id.btnLogOut);
+        //btnLogOut = findViewById(R.id.btnLogOut);
         btnDescribeProfessor = findViewById(R.id.btnDescribeProfessor);
         btnCancelForm = findViewById(R.id.btnCancelForm);
         formDescribeProfessor = findViewById(R.id.formDescribeProfessor);
 
-        btnLogOut.setOnClickListener(v -> logoutUser());
+        //btnLogOut.setOnClickListener(v -> logoutUser());
         btnDescribeProfessor.setOnClickListener(v -> toggleFormVisibility());
         btnSaveForm = findViewById(R.id.btnSaveForm);
         editTextDescriptionProfessor = findViewById(R.id.editTextDescriptionProfessor);
@@ -169,7 +169,7 @@ public class Principal extends AppCompatActivity {
             limpiarCamposFormulario(); // limpiamos campos
             formDescribeProfessor.setVisibility(View.GONE);
             btnDescribeProfessor.setVisibility(View.VISIBLE);
-            btnLogOut.setVisibility(View.VISIBLE);
+            //btnLogOut.setVisibility(View.VISIBLE);
         });
         //cargar materias del profesor seleccionado
         autoCompleteProfesores.setOnItemClickListener((parent, view, position, id) -> {
@@ -221,7 +221,7 @@ public class Principal extends AppCompatActivity {
                                         limpiarCamposFormulario(); // limpiamos campos
                                         formDescribeProfessor.setVisibility(View.GONE);
                                         btnDescribeProfessor.setVisibility(View.VISIBLE);
-                                        btnLogOut.setVisibility(View.VISIBLE);
+                                        //btnLogOut.setVisibility(View.VISIBLE);
                                     })
                                     .addOnFailureListener(e -> {
                                         Toast.makeText(this, "Error al enviar reseña", Toast.LENGTH_SHORT).show();
@@ -296,7 +296,7 @@ public class Principal extends AppCompatActivity {
     private void toggleFormVisibility() {
         formDescribeProfessor.setVisibility(View.VISIBLE);
         btnDescribeProfessor.setVisibility(View.GONE);
-        btnLogOut.setVisibility(View.GONE);
+        //btnLogOut.setVisibility(View.GONE);
     }
     private void limpiarCamposFormulario() {
         autoCompleteProfesores.setText("");

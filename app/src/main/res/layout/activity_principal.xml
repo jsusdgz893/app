@@ -78,7 +78,8 @@
                     android:id="@+id/autoCompleteProfesores"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Selecciona o escribe el nombre del profesor" />
+                    android:hint="Selecciona o escribe el nombre del profesor"
+                    android:textColor="#090909" />
 
                 <AutoCompleteTextView
                     android:id="@+id/autoCompleteMaterias"
@@ -137,18 +138,6 @@
 
 
         <!-- Botón "Cerrar sesión" -->
-        <Button
-            android:id="@+id/btnLogOut"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginBottom="20dp"
-            android:layout_marginEnd="16dp"
-            android:backgroundTint="@color/white"
-            android:text="Cerrar sesión"
-            android:textColor="@color/black"
-            android:textStyle="bold" />
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerOpiniones"
             android:layout_width="match_parent"
