@@ -4,7 +4,9 @@
         <item name="android:background">@color/dark_gray</item> <!-- Fondo gris oscuro -->
         <item name="android:textColor">@color/white</item> <!-- Texto blanco -->
         <item name="android:textColorHint">@color/gray</item> <!-- Texto de hint gris -->
-        <item name="android:editTextColor">@color/white</item> <!-- Color de texto del EditText blanco -->
+        <item name="android:editTextColor">@color/white</item>
+        <item name="queryHint">@string/buscar_profesores</item><!-- Color de texto del EditText blanco -->
     </style>
 
+    <string name="buscar_profesores">Buscar profesores...</string>
 </resources>

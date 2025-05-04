@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class TeacherProfileActivity extends AppCompatActivity {
-    private TextView tvNombreProfesor,tvCalPromedio;//linea agregada
+    private TextView tvNombreProfesor,tvCalPromedio, tvTotalResenias;//linea agregada
     private ListView listViewResenas;
     private FirebaseFirestore db;
     private String idProfesor, nombreProfesor;
@@ -40,6 +40,7 @@ public class TeacherProfileActivity extends AppCompatActivity {
         listViewResenas = findViewById(R.id.listViewResenas);
 
         tvCalPromedio = findViewById(R.id.tvCalPromedio);//linea agregada
+        tvTotalResenias = findViewById(R.id.tvTotalResenias);//linea agregada
 
         tvNombreProfesor.setText(nombreProfesor);
         cargarResenasDelProfesor();
@@ -58,6 +59,8 @@ public class TeacherProfileActivity extends AppCompatActivity {
                         float sumaCalificaciones=0;//linea agregada
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
+                            int likes = getNumberAsInt(document.get("likes"));
+                            int dislikes = getNumberAsInt(document.get("dislikes"));
                             Double calificacion = document.getDouble("calificacion");//linea agregada
                             totalResenias++;//linea agregada
                             sumaCalificaciones+=calificacion;//linea agregada
@@ -65,6 +68,12 @@ public class TeacherProfileActivity extends AppCompatActivity {
                             resena.put("materia", document.getString("materia"));
                             resena.put("calificacion", calificacion);
                             resena.put("comentario", document.getString("comentario"));
+                            resena.put("id", document.getId());
+                            resena.put("likes", likes);
+                            resena.put("dislikes", dislikes);
+                            resena.put("likedBy", document.get("likedBy"));
+                            resena.put("dislikedBy", document.get("dislikedBy"));
+                            resena.put("id_usuario", document.getString("id_usuario"));
                             resenas.add(resena);
                         }
 
@@ -72,13 +81,12 @@ public class TeacherProfileActivity extends AppCompatActivity {
                         if (totalResenias > 0) {
                             float promedio = sumaCalificaciones / totalResenias;
                             String promedioFormateado = String.format(Locale.getDefault(), "%.1f", promedio);
-                            tvCalPromedio.setText(String.format("Calificación promedio: ⭐ %s/5 (%d reseñas)",
-                                    promedioFormateado, totalResenias));
+                            tvCalPromedio.setText(String.format("Calificación promedio: ⭐ %s/5",
+                                    promedioFormateado));
+                            tvTotalResenias.setText(String.format("Total de reseñas: %d", totalResenias));
                         } else {
                             tvCalPromedio.setText("Calificación promedio: Sin reseñas aún");
                         }
-
-
 
                         ResenaAdapter adapter = new ResenaAdapter(this, resenas);
                         listViewResenas.setAdapter(adapter);
@@ -91,4 +99,19 @@ public class TeacherProfileActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private int getNumberAsInt(Object number) {
+        if (number == null) {
+            return 0;
+        }
+        if (number instanceof Long) {
+            return ((Long) number).intValue();
+        } else if (number instanceof Integer) {
+            return (Integer) number;
+        } else if (number instanceof Double) {
+            return ((Double) number).intValue();
+        }
+        return 0;
+    }
+
 }

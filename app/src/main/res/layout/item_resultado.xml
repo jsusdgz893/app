@@ -41,6 +41,7 @@
                 android:layout_marginBottom="16dp"
                 android:text="Descripción del elemento"
                 android:textSize="14sp" />
+
             <TextView
                 android:id="@+id/TextoCalificacion"
                 android:layout_width="wrap_content"

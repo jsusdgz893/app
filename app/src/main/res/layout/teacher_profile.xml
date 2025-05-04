@@ -8,79 +8,94 @@
     android:background="@color/black"
     tools:context=".TeacherProfileActivity">
 
-    <ScrollView
+    <!-- Elimina el ScrollView exterior y ajusta el ListView -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:padding="10dp">
 
-        <LinearLayout
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="14dp" />
+
+        <Button
+            android:id="@+id/backButtonTeacherProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="start"
+            android:backgroundTint="#1E88E5"
+            android:drawableLeft="@android:drawable/ic_menu_revert"
+            android:drawableTint="#FFFFFF"
+            android:paddingStart="10dp"
+            android:text="Regresar"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="201dp"
+            android:layout_height="186dp"
+            android:layout_gravity="center"
+            app:srcCompat="@drawable/profesores" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="14dp" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Nombre del profesor"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="14dp" />
+
+        <TextView
+            android:id="@+id/tvCalPromedio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:gravity="center"
+            android:text="Calificación promedio: "
+            android:textColor="#FFD700"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-            <Space android:layout_height="14dp" android:layout_width="match_parent"/>
+        <TextView
+            android:id="@+id/tvTotalResenias"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="#FFD700"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/backButtonTeacherProfile"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_gravity="start"
-                android:backgroundTint="#1E88E5"
-                android:drawableLeft="@android:drawable/ic_menu_revert"
-                android:drawableTint="#FFFFFF"
-                android:paddingStart="10dp"
-                android:text="Regresar"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"/>
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reseñas:"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-            <Space android:layout_height="26dp" android:layout_width="match_parent"/>
-
-            <ImageView
-                android:id="@+id/imageView2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:srcCompat="@drawable/profesores"/>
-
-            <Space android:layout_height="14dp" android:layout_width="match_parent"/>
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Nombre del profesor"
-                android:textColor="#FFFFFF"
-                android:textSize="24sp"
-                android:textStyle="bold"/>
-
-            <Space android:layout_height="14dp" android:layout_width="match_parent"/>
-            <TextView
-                android:id="@+id/tvCalPromedio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                android:gravity="center"
-                android:text="Calificación promedio: "
-                android:textColor="#FFD700"
-                android:textSize="20sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Reseñas:"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold"/>
-
-            <ListView
-                android:id="@+id/listViewResenas"
-                android:layout_width="match_parent"
-                android:layout_height="297dp"
-                android:divider="@color/white"
-                android:dividerHeight="1dp" />
-        </LinearLayout>
-    </ScrollView>
+        <!-- Cambia el ListView a altura wrap_content y peso 1 -->
+        <ListView
+            android:id="@+id/listViewResenas"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:divider="@color/white"
+            android:dividerHeight="1dp" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

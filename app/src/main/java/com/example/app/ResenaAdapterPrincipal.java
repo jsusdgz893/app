@@ -23,11 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
+public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
     private final FirebaseFirestore db;
     private final FirebaseUser currentUser;
 
-    public ResenaAdapter(Context context, List<Map<String, Object>> resenas) {
+    public ResenaAdapterPrincipal(Context context, List<Map<String, Object>> resenas) {
         super(context, R.layout.item_resena, resenas);
         db = FirebaseFirestore.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -37,7 +37,7 @@ public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_resena, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_resena_main, parent, false);
         }
 
         convertView.setOnClickListener(null);
@@ -48,15 +48,27 @@ public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
         }
 
         // Configurar vistas
-        TextView tvMateria = convertView.findViewById(R.id.tvMateria);
+        TextView tvMateria = convertView.findViewById(R.id.tvMateriaMain);
         TextView tvCalificacion = convertView.findViewById(R.id.tvCalificacion);
         TextView tvComentario = convertView.findViewById(R.id.tvComentario);
         ImageButton btnLike = convertView.findViewById(R.id.btnLike);
         ImageButton btnDislike = convertView.findViewById(R.id.btnDislike);
         TextView textViewLikes = convertView.findViewById(R.id.textViewLikes);
         TextView textViewDislikes = convertView.findViewById(R.id.textViewDislikes);
+        TextView tvProfesor = convertView.findViewById(R.id.tvProfesorMain);
 
-        // Mostrar datos de la reseña
+        String idProfesor = resena.get("id_profesor").toString();
+
+        db.collection("profesores").document(idProfesor).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                String nombreProfesor = documentSnapshot.getString("nombre");
+                tvProfesor.setText(nombreProfesor);
+            }
+            else {
+                Toast.makeText(getContext(), "Error al cargar el profesor", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         tvMateria.setText(resena.containsKey("materia") ? resena.get("materia").toString() : "");
 
         float calificacion = resena.containsKey("calificacion") ?
@@ -140,50 +152,36 @@ public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
         Map<String, Object> updates = new HashMap<>();
 
         if (isLike) {
-            if (hadLiked) {
-                //quitar like si ya estaba activado
-                updates.put("likes", FieldValue.increment(-1));
-                updates.put("likedBy", FieldValue.arrayRemove(userId));
-            } else {
-                //dar like
-                if (hadDisliked) {
-                    //si ya tenía dislike lo quitamos
-                    updates.put("dislikes", FieldValue.increment(-1));
-                    updates.put("dislikedBy", FieldValue.arrayRemove(userId));
-                }
-                updates.put("likes", FieldValue.increment(1));
-                updates.put("likedBy", FieldValue.arrayUnion(userId));
-            }
-        } else {
+            // Caso: Dar like
             if (hadDisliked) {
-                //quitar dislike si ya estaba activado
+                // Si ya tenía dislike, lo removemos
                 updates.put("dislikes", FieldValue.increment(-1));
                 updates.put("dislikedBy", FieldValue.arrayRemove(userId));
-            } else {
-                //dar dislike
-                if (hadLiked) {
-                    //si ya tenía like, lo removemos
-                    updates.put("likes", FieldValue.increment(-1));
-                    updates.put("likedBy", FieldValue.arrayRemove(userId));
-                }
-                updates.put("dislikes", FieldValue.increment(1));
-                updates.put("dislikedBy", FieldValue.arrayUnion(userId));
             }
+            updates.put("likes", FieldValue.increment(1));
+            updates.put("likedBy", FieldValue.arrayUnion(userId));
+        } else {
+            // Caso: Dar dislike
+            if (hadLiked) {
+                // Si ya tenía like, lo removemos
+                updates.put("likes", FieldValue.increment(-1));
+                updates.put("likedBy", FieldValue.arrayRemove(userId));
+            }
+            updates.put("dislikes", FieldValue.increment(1));
+            updates.put("dislikedBy", FieldValue.arrayUnion(userId));
         }
 
         db.collection("resenas").document(reviewId)
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    updateLocalResenaData(resena, isLike, hadLiked, hadDisliked, true);
+                    // Actualizar datos locales para reflejar cambios inmediatos
+                    updateLocalResenaData(resena, isLike, hadLiked, hadDisliked);
 
-                    // Actualizar UI basado en el nuevo estado
-                    boolean nowLiked = resena.containsKey("likedBy") && ((List<String>) resena.get("likedBy")).contains(userId);
-                    boolean nowDisliked = resena.containsKey("dislikedBy") && ((List<String>) resena.get("dislikedBy")).contains(userId);
-
-                    btnLike.setEnabled(!nowLiked);
-                    btnDislike.setEnabled(!nowDisliked);
-                    btnLike.setAlpha(nowLiked ? 0.5f : 1.0f);
-                    btnDislike.setAlpha(nowDisliked ? 0.5f : 1.0f);
+                    // Actualizar UI
+                    btnLike.setEnabled(!isLike);
+                    btnDislike.setEnabled(isLike);
+                    btnLike.setAlpha(isLike ? 0.5f : 1.0f);
+                    btnDislike.setAlpha(isLike ? 1.0f : 0.5f);
 
                     notifyDataSetChanged();
                 })
@@ -194,7 +192,8 @@ public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
     }
 
     private void updateLocalResenaData(Map<String, Object> resena, boolean isLike,
-                                       boolean hadLiked, boolean hadDisliked, boolean isToggle) {
+                                       boolean hadLiked, boolean hadDisliked) {
+        // Actualizar contadores locales
         int likes = getNumberAsInt(resena.get("likes"));
         int dislikes = getNumberAsInt(resena.get("dislikes"));
 
@@ -204,36 +203,24 @@ public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
         String userId = currentUser.getUid();
 
         if (isLike) {
-            if (isToggle && hadLiked) {
-                // Quitar like
-                likes--;
-                likedBy.remove(userId);
-            } else {
-                // Dar like
-                if (hadDisliked) {
-                    dislikes--;
-                    dislikedBy.remove(userId);
-                }
-                likes++;
-                if (!likedBy.contains(userId)) {
-                    likedBy.add(userId);
-                }
-            }
-        } else {
-            if (isToggle && hadDisliked) {
-                // Quitar dislike
+            // Caso like
+            if (hadDisliked) {
                 dislikes--;
                 dislikedBy.remove(userId);
-            } else {
-                // Dar dislike
-                if (hadLiked) {
-                    likes--;
-                    likedBy.remove(userId);
-                }
-                dislikes++;
-                if (!dislikedBy.contains(userId)) {
-                    dislikedBy.add(userId);
-                }
+            }
+            likes++;
+            if (!likedBy.contains(userId)) {
+                likedBy.add(userId);
+            }
+        } else {
+            // Caso dislike
+            if (hadLiked) {
+                likes--;
+                likedBy.remove(userId);
+            }
+            dislikes++;
+            if (!dislikedBy.contains(userId)) {
+                dislikedBy.add(userId);
             }
         }
 

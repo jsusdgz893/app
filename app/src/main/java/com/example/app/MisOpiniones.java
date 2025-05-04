@@ -133,47 +133,81 @@ public class MisOpiniones extends AppCompatActivity implements ReseñaAdapter.On
     private void getReseñasDelUsuario(ReseñasCallback callback) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
-            List<Reseña> lista = new ArrayList<>();
-
-            db.collection("resenas")
-                    .whereEqualTo("id_usuario", userId)
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                double calificacion = document.getDouble("calificacion");
-                                String comentario = document.getString("comentario");
-                                String idProfesor = document.getString("id_profesor");
-                                String materia = document.getString("materia");
-                                String idResenia = document.getId(); // Obtener el ID del documento
-
-                                db.collection("profesores")
-                                        .document(idProfesor)
-                                        .get()
-                                        .addOnCompleteListener(professorTask -> {
-                                            if (professorTask.isSuccessful()) {
-                                                DocumentSnapshot professorDoc = professorTask.getResult();
-                                                if (professorDoc.exists()) {
-                                                    String profesorNombre = professorDoc.getString("nombre");
-                                                    lista.add(new Reseña(calificacion, comentario, profesorNombre, userId, materia, idResenia)); // Añadir idResenia
-
-                                                    // Llamar al callback cuando todas las reseñas se carguen
-                                                    if (lista.size() == task.getResult().size()) {
-                                                        callback.onReseñasLoaded(lista);
-                                                    }
-                                                }
-                                            }
-                                        });
-                            }
-                        } else {
-                            Log.d("Reseña Info", "Error al obtener las reseñas: ", task.getException());
-                        }
-                    });
-        } else {
+        if (currentUser == null) {
             Log.d("User Info", "No user is signed in");
+            callback.onReseñasLoaded(new ArrayList<>());
+            return;
         }
+
+        String userId = currentUser.getUid();
+        List<Reseña> lista = new ArrayList<>();
+
+        db.collection("resenas")
+                .whereEqualTo("id_usuario", userId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.e("Reseña Error", "Error al obtener reseñas: ", task.getException());
+                        callback.onReseñasLoaded(new ArrayList<>());
+                        return;
+                    }
+
+                    if (task.getResult().isEmpty()) {
+                        callback.onReseñasLoaded(new ArrayList<>());
+                        return;
+                    }
+
+                    // Contador para manejar las llamadas asíncronas
+                    final int[] pendingRequests = {task.getResult().size()};
+
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        // Convertir datos de forma segura
+                        double calificacion = document.getDouble("calificacion");
+                        String comentario = document.getString("comentario");
+                        String idProfesor = document.getString("id_profesor");
+                        String materia = document.getString("materia");
+                        String idResenia = document.getId();
+
+                        // Manejo seguro de listas
+                        List<String> likedBy = document.get("likedBy") != null ?
+                                (List<String>) document.get("likedBy") : new ArrayList<>();
+                        List<String> dislikedBy = document.get("dislikedBy") != null ?
+                                (List<String>) document.get("dislikedBy") : new ArrayList<>();
+
+                        // Manejo seguro de números
+                        String idUsuario = document.getString("id_usuario");
+
+                        // Obtener nombre del profesor
+                        db.collection("profesores").document(idProfesor)
+                                .get()
+                                .addOnCompleteListener(professorTask -> {
+                                    String profesorNombre = "Profesor desconocido";
+
+                                    if (professorTask.isSuccessful() && professorTask.getResult() != null) {
+                                        profesorNombre = professorTask.getResult().getString("nombre");
+                                    }
+
+                                    // Crear y añadir reseña
+                                    lista.add(new Reseña(
+                                            calificacion,
+                                            comentario,
+                                            profesorNombre,
+                                            idProfesor,
+                                            materia,
+                                            idResenia,
+                                            likedBy,
+                                            dislikedBy,
+                                            idUsuario
+                                    ));
+
+                                    // Verificar si todas las solicitudes han terminado
+                                    pendingRequests[0]--;
+                                    if (pendingRequests[0] == 0) {
+                                        callback.onReseñasLoaded(lista);
+                                    }
+                                });
+                    }
+                });
     }
     public interface ReseñasCallback {
         void onReseñasLoaded(List<Reseña> reseñas);

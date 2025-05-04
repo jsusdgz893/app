@@ -40,10 +40,31 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#CCC8BB"
+                android:hint="Buscar Profesores"
                 android:queryHint="Buscar..."
                 android:theme="@style/SearchViewStyle"
                 app:backgroundTint="@color/white"
-                app:iconifiedByDefault="false" />
+                app:iconifiedByDefault="false">
+
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </androidx.appcompat.widget.SearchView>
+
+            <TextView
+                android:id="@+id/textViewLastReviews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
+                android:paddingTop="5dp"
+                android:text="Ultimas reseñas:"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
             <!-- Resultados de búsqueda -->
             <androidx.recyclerview.widget.RecyclerView
@@ -78,26 +99,30 @@
                     android:id="@+id/autoCompleteProfesores"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Selecciona o escribe el nombre del profesor"
-                    android:textColor="#090909" />
+                    android:hint="Escribe el nombre del profesor"
+                    android:textColor="#090909"
+                    android:textColorHint="@color/dark_gray" />
 
                 <AutoCompleteTextView
                     android:id="@+id/autoCompleteMaterias"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Selecciona o escribe la materia después de seleccionar al profesor" />
+                    android:hint="Escribe la materia "
+                    android:textColor="#090909"
+                    android:textColorHint="@color/dark_gray" />
+
                 <EditText
                     android:id="@+id/editTextDescriptionProfessor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="Descripción o comentario (máx. 250 caracteres)"
-                    android:maxLength="250"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/dark_gray"
+                    android:gravity="top|start"
+                    android:hint="Comentario (máx. 250 caracteres)"
                     android:inputType="textMultiLine"
+                    android:maxLength="250"
                     android:minLines="3"
-                    android:gravity="top|start" />
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/dark_gray" />
 
                 <RatingBar
                     android:id="@+id/ratingBarProfessor"
@@ -105,6 +130,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:numStars="5"
+                    android:progressTint="#FDD835"
                     android:stepSize="1.0" />
 
                 <LinearLayout
@@ -133,30 +159,45 @@
                         android:textColor="@color/white" />
                 </LinearLayout>
             </LinearLayout>
+
+            <ListView
+                android:id="@+id/listViewResenas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:divider="@color/white"
+                android:dividerHeight="1dp" />
+
+            <TextView
+                android:id="@+id/emptyResenas3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="20dp"
+                android:gravity="center"
+                android:text="No hay reseñas disponibles"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnDescribeProfessor"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#1E88E5"
+                android:elevation="4dp"
+                android:text="DESCRIBE A TU PROFESOR"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
-
-
-        <!-- Botón "Cerrar sesión" -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerOpiniones"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="8dp"
-            android:layout_marginTop="8dp"
-            android:scrollbars="vertical" />
-
-        <!-- Botón "Describe a tu profesor" -->
-        <Button
-            android:id="@+id/btnDescribeProfessor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="80dp"
-            android:backgroundTint="@color/white"
-            android:text="Describe a tu profesor"
-            android:textColor="@color/black" />
     </RelativeLayout>
 
 

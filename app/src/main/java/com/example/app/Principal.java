@@ -1,13 +1,22 @@
 package com.example.app;
 
+import static com.example.app.R.*;
+
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RatingBar;
 import androidx.appcompat.widget.SearchView;
 import android.widget.Toast;
@@ -30,7 +39,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -46,7 +57,7 @@ import android.widget.TextView;
 
 public class Principal extends AppCompatActivity {
 
-    private Button btnLogOut, btnDescribeProfessor, btnCancelForm, btnSaveForm;
+    private Button btnDescribeProfessor, btnCancelForm, btnSaveForm;
     private EditText editTextDescriptionProfessor;
     private RatingBar ratingBarProfessor;
     private LinearLayout formDescribeProfessor;
@@ -55,15 +66,16 @@ public class Principal extends AppCompatActivity {
     private ActionBarDrawerToggle toggle;
     private NavigationView navigationView;
     private Toolbar toolbar;
+    private ListView listViewResenas;
 
-
+    private TextView emptyResenas2, textViewLastReviews;
 
 
     private AutoCompleteTextView autoCompleteProfesores, autoCompleteMaterias;
     private FirebaseFirestore db;
 
     //para la busqueda del profesor
-    private androidx.appcompat.widget.SearchView searchView;
+    private SearchView searchView;
     private RecyclerView recyclerResultadosBusqueda;
     private List<Map<String, Object>> listaProfesores = new ArrayList<>();
     private SearchAdapter searchAdapter;
@@ -73,18 +85,37 @@ public class Principal extends AppCompatActivity {
     private Map<String, String> mapMaterias = new HashMap<>(); // ID -> Nombre
     private ArrayAdapter<String> materiasAdapter; // Adaptador específico para materias
 
+    public static void hideKeyboard(Activity activity) { //Funcion para esconder el teclado despues de una accion
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = activity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
+        hideKeyboard(Principal.this);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
+        // Estilizar el título "CUCEI IA" (mismo estilo que en Inicio.java)
+        styleToolbarTitle(toolbar);
+
+        textViewLastReviews = findViewById(id.textViewLastReviews);
 
         autoCompleteProfesores = findViewById(R.id.autoCompleteProfesores);
         autoCompleteMaterias = findViewById(R.id.autoCompleteMaterias);
         db = FirebaseFirestore.getInstance();
 
-
+        listViewResenas = findViewById(R.id.listViewResenas);
+        cargarUltimasResena();
 
         loadProfesores();
         loadMaterias();
@@ -106,6 +137,8 @@ public class Principal extends AppCompatActivity {
         ImageView imageViewProfile = headerView.findViewById(R.id.imageViewProfile);
         TextView textViewName = headerView.findViewById(R.id.textViewName);
         TextView textViewEmail = headerView.findViewById(R.id.textViewEmail);
+
+        emptyResenas2 = findViewById(R.id.emptyResenas3);
 
 // Obtener información del usuario actual
         AtomicReference<FirebaseUser> user = new AtomicReference<>(FirebaseAuth.getInstance().getCurrentUser());
@@ -154,22 +187,23 @@ public class Principal extends AppCompatActivity {
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        //btnLogOut = findViewById(R.id.btnLogOut);
         btnDescribeProfessor = findViewById(R.id.btnDescribeProfessor);
         btnCancelForm = findViewById(R.id.btnCancelForm);
         formDescribeProfessor = findViewById(R.id.formDescribeProfessor);
 
-        //btnLogOut.setOnClickListener(v -> logoutUser());
         btnDescribeProfessor.setOnClickListener(v -> toggleFormVisibility());
         btnSaveForm = findViewById(R.id.btnSaveForm);
         editTextDescriptionProfessor = findViewById(R.id.editTextDescriptionProfessor);
         ratingBarProfessor = findViewById(R.id.ratingBarProfessor);
 
         btnCancelForm.setOnClickListener(v -> {
+            hideKeyboard(Principal.this);
             limpiarCamposFormulario(); // limpiamos campos
+            searchView.setVisibility(View.VISIBLE);
             formDescribeProfessor.setVisibility(View.GONE);
             btnDescribeProfessor.setVisibility(View.VISIBLE);
-            //btnLogOut.setVisibility(View.VISIBLE);
+            listViewResenas.setVisibility(View.VISIBLE);
+            textViewLastReviews.setVisibility(View.VISIBLE);
         });
         //cargar materias del profesor seleccionado
         autoCompleteProfesores.setOnItemClickListener((parent, view, position, id) -> {
@@ -180,6 +214,7 @@ public class Principal extends AppCompatActivity {
         btnSaveForm.setOnClickListener(v -> {
             String profesorSeleccionado = autoCompleteProfesores.getText().toString().trim();
             String comentario = editTextDescriptionProfessor.getText().toString().trim();
+            Integer likes = 0, dislikes = 0;
             float calificacion = ratingBarProfessor.getRating();
 
             String nombreMateriaSeleccionada = autoCompleteMaterias.getText().toString().trim();
@@ -204,6 +239,9 @@ public class Principal extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         if (!queryDocumentSnapshots.isEmpty()) {
+                            List<String> likedBy = new ArrayList<>();
+                            List<String> dislikedBy = new ArrayList<>();
+
                             DocumentSnapshot profDoc = queryDocumentSnapshots.getDocuments().get(0);
                             String idProfesor = profDoc.getId();
 
@@ -213,15 +251,27 @@ public class Principal extends AppCompatActivity {
                             resena.put("id_usuario", idUsuario);
                             resena.put("id_profesor", idProfesor);
                             resena.put("materia", nombreMateriaSeleccionada);
+                            resena.put("likes", likes);
+                            resena.put("dislikes", dislikes);
+                            resena.put("likedBy", likedBy);
+                            resena.put("dislikedBy", dislikedBy);
+                            resena.put("fecha", FieldValue.serverTimestamp());
+
 
                             db.collection("resenas")
                                     .add(resena)
                                     .addOnSuccessListener(documentReference -> {
+                                        String idResena = documentReference.getId();
+                                        documentReference.update("id", idResena);
                                         Toast.makeText(this, "Reseña enviada con éxito", Toast.LENGTH_SHORT).show();
                                         limpiarCamposFormulario(); // limpiamos campos
+                                        searchView.setVisibility(View.VISIBLE);
+                                        hideKeyboard(Principal.this);
                                         formDescribeProfessor.setVisibility(View.GONE);
                                         btnDescribeProfessor.setVisibility(View.VISIBLE);
-                                        //btnLogOut.setVisibility(View.VISIBLE);
+                                        cargarUltimasResena();
+                                        textViewLastReviews.setVisibility(View.VISIBLE);
+                                        listViewResenas.setVisibility(View.VISIBLE);
                                     })
                                     .addOnFailureListener(e -> {
                                         Toast.makeText(this, "Error al enviar reseña", Toast.LENGTH_SHORT).show();
@@ -236,6 +286,39 @@ public class Principal extends AppCompatActivity {
                     });
         });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Volver a cargar las reseñas cada vez que la actividad se reinicia
+        cargarUltimasResena();
+    }
+
+    private void cargarUltimasResena() {
+        db.collection("resenas").orderBy("fecha", Query.Direction.DESCENDING).limit(10).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult().isEmpty()) {
+                    listViewResenas.setEmptyView(findViewById(R.id.emptyResenas3));
+                }
+                List<Map<String, Object>> resenas = new ArrayList<>();
+                for (DocumentSnapshot document : task.getResult()) {
+                    Map<String, Object> resena = document.getData();
+                    if (resena != null) {
+                        resena.put("id", document.getId());
+                        resena.put("materia", document.getString("materia"));
+                        resenas.add(resena);
+                    }
+                }
+                ResenaAdapterPrincipal adapter = new ResenaAdapterPrincipal(this, resenas);
+                listViewResenas.setAdapter(adapter);
+            } else {
+                Toast.makeText(this, "Error al cargar reseñas", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
 
 
     private void loadProfesores() {
@@ -282,21 +365,12 @@ public class Principal extends AppCompatActivity {
         });
     }
 
-    private void logoutUser() {
-        FirebaseAuth.getInstance().signOut();
-        googleSignInClient.signOut().addOnCompleteListener(this, task -> {
-            getSharedPreferences("MisPreferencias", MODE_PRIVATE).edit().clear().apply();
-            Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, Inicio.class));
-            finish();
-        });
-    }
-
-
     private void toggleFormVisibility() {
         formDescribeProfessor.setVisibility(View.VISIBLE);
         btnDescribeProfessor.setVisibility(View.GONE);
-        //btnLogOut.setVisibility(View.GONE);
+        searchView.setVisibility(View.INVISIBLE);
+        listViewResenas.setVisibility(View.GONE);
+        textViewLastReviews.setVisibility(View.GONE);
     }
     private void limpiarCamposFormulario() {
         autoCompleteProfesores.setText("");
@@ -311,6 +385,7 @@ public class Principal extends AppCompatActivity {
 //para la busqueda de profesor
     private void setupSearchView() {
         searchView = findViewById(R.id.searchView);
+
         recyclerResultadosBusqueda = findViewById(R.id.recyclerResultadosBusqueda);
 
 
@@ -329,6 +404,10 @@ public class Principal extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                textViewLastReviews = findViewById(R.id.textViewLastReviews);
+                textViewLastReviews.setVisibility(View.GONE);
+                listViewResenas.setVisibility(View.GONE);
+                btnDescribeProfessor.setVisibility(View.GONE);
                 buscarProfesores(query);
                 return true;
             }
@@ -336,6 +415,10 @@ public class Principal extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.isEmpty()) {
+                    textViewLastReviews = findViewById(R.id.textViewLastReviews);
+                    textViewLastReviews.setVisibility(View.VISIBLE);
+                    listViewResenas.setVisibility(View.VISIBLE);
+                    btnDescribeProfessor.setVisibility(View.VISIBLE);
                     recyclerResultadosBusqueda.setVisibility(View.GONE);
                 }
                 return false;
@@ -420,6 +503,29 @@ public class Principal extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    private void styleToolbarTitle(Toolbar toolbar) {
+        String fullText = "CUCEI IA";
+        SpannableString spannableString = new SpannableString(fullText);
+
+        // Color blanco para "CUCEI"
+        spannableString.setSpan(
+                new ForegroundColorSpan(Color.WHITE),
+                0, 5,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+
+        // Color azul claro para "IA" (mismo color que en Inicio.java)
+        int lightblue = Color.parseColor("#0091EA");
+        spannableString.setSpan(
+                new ForegroundColorSpan(lightblue),
+                6, 8,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+
+        // Establecer el título estilizado
+        getSupportActionBar().setTitle(spannableString);
     }
 
 

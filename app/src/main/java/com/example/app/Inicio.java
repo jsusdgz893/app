@@ -1,7 +1,10 @@
 package com.example.app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -48,10 +51,23 @@ public class Inicio extends AppCompatActivity {
     private GoogleSignInClient googleSignInClient;
     private int RC_SIGN_IN = 20;
 
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager != null ? connectivityManager.getActiveNetworkInfo(): null;
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+
+    }
+
 
     @Override
     protected void onStart() {
         super.onStart();
+
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "No hay conexión a internet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             startActivity(new Intent(Inicio.this, Principal.class));
             finish();
@@ -165,6 +181,7 @@ public class Inicio extends AppCompatActivity {
         } else {
             Toast.makeText(Inicio.this, "Error en la autenticación",
                     Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 

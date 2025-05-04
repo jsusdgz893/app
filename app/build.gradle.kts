@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
 }
 
@@ -13,7 +14,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -26,9 +26,14 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
     }
 
     signingConfigs {
@@ -39,35 +44,37 @@ android {
             keyPassword = "android"
         }
     }
-
 }
 
 dependencies {
+    // AndroidX
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
 
+    // Firebase BOM
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
     implementation(libs.firebase.analytics)
-
-    implementation(libs.google.firebase.auth)
+    implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.firebase.inappmessaging)
 
-    // Google Sign-In
+    // Google Services
     implementation(libs.play.services.auth)
 
-    // Credentials API
+    // Credentials
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
 
-    // Añade las dependencias para cualquier otro producto de Firebase que desees
-    implementation("com.google.firebase:firebase-firestore-ktx")
+    // Glide
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
 
-    implementation ("com.github.bumptech.glide:glide:4.15.1")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
-
+    // Testing
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }
