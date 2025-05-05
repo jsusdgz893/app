@@ -27,6 +27,8 @@ public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
     private final FirebaseFirestore db;
     private final FirebaseUser currentUser;
 
+    private long lastClickTime = 0;
+
     public ResenaAdapter(Context context, List<Map<String, Object>> resenas) {
         super(context, R.layout.item_resena, resenas);
         db = FirebaseFirestore.getInstance();
@@ -112,8 +114,6 @@ public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
         boolean hasLiked = likedBy.contains(currentUser.getUid());
         boolean hasDisliked = dislikedBy.contains(currentUser.getUid());
 
-        btnLike.setEnabled(!hasLiked);
-        btnDislike.setEnabled(!hasDisliked);
         btnLike.setAlpha(hasLiked ? 0.5f : 1.0f);
         btnDislike.setAlpha(hasDisliked ? 0.5f : 1.0f);
 
@@ -125,6 +125,12 @@ public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
 
     private void handleVoteClick(String reviewId, Map<String, Object> resena, boolean isLike,
                                  ImageButton btnLike, ImageButton btnDislike) {
+        // Evitar múltiples clicks
+        if (System.currentTimeMillis() - lastClickTime < 500) {
+            return;
+        }
+        lastClickTime = System.currentTimeMillis();
+
         if (currentUser == null || reviewId.isEmpty()) {
             Toast.makeText(getContext(), "Debes iniciar sesión para votar", Toast.LENGTH_SHORT).show();
             return;
@@ -176,12 +182,10 @@ public class ResenaAdapter extends ArrayAdapter<Map<String, Object>> {
                 .addOnSuccessListener(aVoid -> {
                     updateLocalResenaData(resena, isLike, hadLiked, hadDisliked, true);
 
-                    // Actualizar UI basado en el nuevo estado
+
                     boolean nowLiked = resena.containsKey("likedBy") && ((List<String>) resena.get("likedBy")).contains(userId);
                     boolean nowDisliked = resena.containsKey("dislikedBy") && ((List<String>) resena.get("dislikedBy")).contains(userId);
 
-                    btnLike.setEnabled(!nowLiked);
-                    btnDislike.setEnabled(!nowDisliked);
                     btnLike.setAlpha(nowLiked ? 0.5f : 1.0f);
                     btnDislike.setAlpha(nowDisliked ? 0.5f : 1.0f);
 

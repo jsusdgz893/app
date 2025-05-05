@@ -180,7 +180,6 @@ public class Principal extends AppCompatActivity {
       //para buscar profesor
         setupSearchView();
 
-
         // Google Sign-In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -204,6 +203,7 @@ public class Principal extends AppCompatActivity {
             btnDescribeProfessor.setVisibility(View.VISIBLE);
             listViewResenas.setVisibility(View.VISIBLE);
             textViewLastReviews.setVisibility(View.VISIBLE);
+            emptyResenas2.setVisibility(View.VISIBLE);
         });
         //cargar materias del profesor seleccionado
         autoCompleteProfesores.setOnItemClickListener((parent, view, position, id) -> {
@@ -218,7 +218,6 @@ public class Principal extends AppCompatActivity {
             float calificacion = ratingBarProfessor.getRating();
 
             String nombreMateriaSeleccionada = autoCompleteMaterias.getText().toString().trim();
-
 
             // Guardar normalmente nombreMateriaSeleccionada
             if (profesorSeleccionado.isEmpty() || nombreMateriaSeleccionada.isEmpty() || comentario.isEmpty() || calificacion == 0f) {
@@ -239,17 +238,18 @@ public class Principal extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         if (!queryDocumentSnapshots.isEmpty()) {
-                            List<String> likedBy = new ArrayList<>();
-                            List<String> dislikedBy = new ArrayList<>();
-
                             DocumentSnapshot profDoc = queryDocumentSnapshots.getDocuments().get(0);
                             String idProfesor = profDoc.getId();
 
+                            List<String> likedBy = new ArrayList<>();
+                            List<String> dislikedBy = new ArrayList<>();
+
                             Map<String, Object> resena = new HashMap<>();
+                            resena.put("id_profesor", idProfesor); // Asegúrate de guardar el ID correcto
+                            resena.put("nombre_profesor", profesorSeleccionado);
                             resena.put("comentario", comentario);
                             resena.put("calificacion", calificacion);
                             resena.put("id_usuario", idUsuario);
-                            resena.put("id_profesor", idProfesor);
                             resena.put("materia", nombreMateriaSeleccionada);
                             resena.put("likes", likes);
                             resena.put("dislikes", dislikes);
@@ -262,21 +262,22 @@ public class Principal extends AppCompatActivity {
                                     .add(resena)
                                     .addOnSuccessListener(documentReference -> {
                                         String idResena = documentReference.getId();
-                                        documentReference.update("id", idResena);
-                                        Toast.makeText(this, "Reseña enviada con éxito", Toast.LENGTH_SHORT).show();
-                                        limpiarCamposFormulario(); // limpiamos campos
-                                        searchView.setVisibility(View.VISIBLE);
-                                        hideKeyboard(Principal.this);
-                                        formDescribeProfessor.setVisibility(View.GONE);
-                                        btnDescribeProfessor.setVisibility(View.VISIBLE);
-                                        cargarUltimasResena();
-                                        textViewLastReviews.setVisibility(View.VISIBLE);
-                                        listViewResenas.setVisibility(View.VISIBLE);
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(this, "Error al enviar reseña", Toast.LENGTH_SHORT).show();
+                                        documentReference.update("id", idResena)
+                                                .addOnSuccessListener(aVoid -> {
+                                                    runOnUiThread(() -> {
+                                                        cargarUltimasResena();
+                                                        limpiarCamposFormulario(); // limpiamos campos
+                                                        searchView.setVisibility(View.VISIBLE);
+                                                        hideKeyboard(Principal.this);
+                                                        formDescribeProfessor.setVisibility(View.GONE);
+                                                        btnDescribeProfessor.setVisibility(View.VISIBLE);
+                                                        textViewLastReviews.setVisibility(View.VISIBLE);
+                                                        emptyResenas2.setVisibility(View.GONE);
+                                                        listViewResenas.setVisibility(View.VISIBLE);
+                                                        Toast.makeText(this, "Reseña enviada con éxito", Toast.LENGTH_SHORT).show();
+                                                    });
+                                                });
                                     });
-
                         } else {
                             Toast.makeText(this, "Profesor no encontrado en la base de datos", Toast.LENGTH_SHORT).show();
                         }
@@ -295,31 +296,79 @@ public class Principal extends AppCompatActivity {
     }
 
     private void cargarUltimasResena() {
-        db.collection("resenas").orderBy("fecha", Query.Direction.DESCENDING).limit(10).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                if (task.getResult().isEmpty()) {
-                    listViewResenas.setEmptyView(findViewById(R.id.emptyResenas3));
-                }
-                List<Map<String, Object>> resenas = new ArrayList<>();
-                for (DocumentSnapshot document : task.getResult()) {
-                    Map<String, Object> resena = document.getData();
-                    if (resena != null) {
-                        resena.put("id", document.getId());
-                        resena.put("materia", document.getString("materia"));
-                        resenas.add(resena);
+        db.collection("resenas")
+                .orderBy("fecha", Query.Direction.DESCENDING)
+                .limit(10)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (task.getResult().isEmpty()) {
+                            listViewResenas.setEmptyView(findViewById(R.id.emptyResenas3));
+                            return;
+                        }
+
+                        List<Map<String, Object>> resenas = new ArrayList<>();
+                        List<String> profesorIds = new ArrayList<>();
+
+                        // Primera pasada: recolectar datos básicos y IDs de profesores
+                        for (DocumentSnapshot document : task.getResult()) {
+                            Map<String, Object> resena = new HashMap<>();
+                            resena.put("id", document.getId());
+                            resena.put("materia", document.getString("materia"));
+                            resena.put("comentario", document.getString("comentario"));
+                            resena.put("calificacion", document.getDouble("calificacion"));
+                            resena.put("id_profesor", document.getString("id_profesor"));
+                            resena.put("id_usuario", document.getString("id_usuario"));
+                            resena.put("likes", document.get("likes"));
+                            resena.put("dislikes", document.get("dislikes"));
+                            resena.put("likedBy", document.get("likedBy"));
+                            resena.put("dislikedBy", document.get("dislikedBy"));
+
+                            String idProfesor = document.getString("id_profesor");
+                            if (idProfesor != null && !profesorIds.contains(idProfesor)) {
+                                profesorIds.add(idProfesor);
+                            }
+                            resenas.add(resena);
+                        }
+
+                        // Si no hay profesores, mostrar datos sin nombres
+                        if (profesorIds.isEmpty()) {
+                            ResenaAdapterPrincipal adapter = new ResenaAdapterPrincipal(this, resenas);
+                            listViewResenas.setAdapter(adapter);
+                            return;
+                        }
+
+                        // Consulta batch de nombres de profesores
+                        db.collection("profesores")
+                                .whereIn(FieldPath.documentId(), profesorIds)
+                                .get()
+                                .addOnCompleteListener(profTask -> {
+                                    if (profTask.isSuccessful()) {
+                                        Map<String, String> profesorNombres = new HashMap<>();
+                                        for (DocumentSnapshot doc : profTask.getResult()) {
+                                            profesorNombres.put(doc.getId(), doc.getString("nombre"));
+                                        }
+
+                                        // Asignar nombres a las reseñas
+                                        for (Map<String, Object> resena : resenas) {
+                                            String profId = (String) resena.get("id_profesor");
+                                            resena.put("nombre_profesor", profesorNombres.getOrDefault(profId, "Profesor desconocido"));
+                                        }
+
+                                        // Actualizar UI
+                                        ResenaAdapterPrincipal adapter = new ResenaAdapterPrincipal(this, resenas);
+                                        listViewResenas.setAdapter(adapter);
+                                    } else {
+                                        // Si falla, mostrar reseñas sin nombres
+                                        ResenaAdapterPrincipal adapter = new ResenaAdapterPrincipal(this, resenas);
+                                        listViewResenas.setAdapter(adapter);
+                                    }
+                                });
+                    } else {
+                        Toast.makeText(this, "Error al cargar reseñas", Toast.LENGTH_SHORT).show();
                     }
-                }
-                ResenaAdapterPrincipal adapter = new ResenaAdapterPrincipal(this, resenas);
-                listViewResenas.setAdapter(adapter);
-            } else {
-                Toast.makeText(this, "Error al cargar reseñas", Toast.LENGTH_SHORT).show();
-            }
-        });
+                });
     }
-
-
-
-
 
     private void loadProfesores() {
         CollectionReference profesoresRef = db.collection("profesores");
@@ -371,6 +420,7 @@ public class Principal extends AppCompatActivity {
         searchView.setVisibility(View.INVISIBLE);
         listViewResenas.setVisibility(View.GONE);
         textViewLastReviews.setVisibility(View.GONE);
+        emptyResenas2.setVisibility(View.GONE);
     }
     private void limpiarCamposFormulario() {
         autoCompleteProfesores.setText("");

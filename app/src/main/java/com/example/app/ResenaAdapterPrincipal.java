@@ -27,8 +27,9 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
     private final FirebaseFirestore db;
     private final FirebaseUser currentUser;
 
+    private long lastClickTime = 0;
     public ResenaAdapterPrincipal(Context context, List<Map<String, Object>> resenas) {
-        super(context, R.layout.item_resena, resenas);
+        super(context, R.layout.item_resena_main, resenas);
         db = FirebaseFirestore.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
     }
@@ -38,9 +39,13 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_resena_main, parent, false);
-        }
 
-        convertView.setOnClickListener(null);
+            ImageButton btnLike = convertView.findViewById(R.id.btnLike);
+            ImageButton btnDislike = convertView.findViewById(R.id.btnDislike);
+
+            btnLike.setEnabled(true);
+            btnDislike.setEnabled(true);
+        }
 
         Map<String, Object> resena = getItem(position);
         if (resena == null) {
@@ -48,26 +53,19 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
         }
 
         // Configurar vistas
+        TextView tvProfesor = convertView.findViewById(R.id.tvProfesorMain);
         TextView tvMateria = convertView.findViewById(R.id.tvMateriaMain);
         TextView tvCalificacion = convertView.findViewById(R.id.tvCalificacion);
         TextView tvComentario = convertView.findViewById(R.id.tvComentario);
-        ImageButton btnLike = convertView.findViewById(R.id.btnLike);
-        ImageButton btnDislike = convertView.findViewById(R.id.btnDislike);
         TextView textViewLikes = convertView.findViewById(R.id.textViewLikes);
         TextView textViewDislikes = convertView.findViewById(R.id.textViewDislikes);
-        TextView tvProfesor = convertView.findViewById(R.id.tvProfesorMain);
+        ImageButton btnLike = convertView.findViewById(R.id.btnLike);
+        ImageButton btnDislike = convertView.findViewById(R.id.btnDislike);
 
-        String idProfesor = resena.get("id_profesor").toString();
-
-        db.collection("profesores").document(idProfesor).get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                String nombreProfesor = documentSnapshot.getString("nombre");
-                tvProfesor.setText(nombreProfesor);
-            }
-            else {
-                Toast.makeText(getContext(), "Error al cargar el profesor", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // Usar el nombre del profesor que ya viene en los datos
+        String nombreProfesor = resena.containsKey("nombre_profesor") ?
+                resena.get("nombre_profesor").toString() : "Profesor desconocido";
+        tvProfesor.setText(nombreProfesor);
 
         tvMateria.setText(resena.containsKey("materia") ? resena.get("materia").toString() : "");
 
@@ -107,6 +105,7 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
             setupVoteButtons(resena, btnLike, btnDislike, idResena);
         }
 
+
         return convertView;
     }
 
@@ -124,8 +123,6 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
         boolean hasLiked = likedBy.contains(currentUser.getUid());
         boolean hasDisliked = dislikedBy.contains(currentUser.getUid());
 
-        btnLike.setEnabled(!hasLiked);
-        btnDislike.setEnabled(!hasDisliked);
         btnLike.setAlpha(hasLiked ? 0.5f : 1.0f);
         btnDislike.setAlpha(hasDisliked ? 0.5f : 1.0f);
 
@@ -137,6 +134,12 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
 
     private void handleVoteClick(String reviewId, Map<String, Object> resena, boolean isLike,
                                  ImageButton btnLike, ImageButton btnDislike) {
+        //evitar múltiples clicks
+        if (System.currentTimeMillis() - lastClickTime < 500) {
+            return;
+        }
+        lastClickTime = System.currentTimeMillis();
+
         if (currentUser == null || reviewId.isEmpty()) {
             Toast.makeText(getContext(), "Debes iniciar sesión para votar", Toast.LENGTH_SHORT).show();
             return;
@@ -152,36 +155,46 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
         Map<String, Object> updates = new HashMap<>();
 
         if (isLike) {
-            // Caso: Dar like
-            if (hadDisliked) {
-                // Si ya tenía dislike, lo removemos
-                updates.put("dislikes", FieldValue.increment(-1));
-                updates.put("dislikedBy", FieldValue.arrayRemove(userId));
-            }
-            updates.put("likes", FieldValue.increment(1));
-            updates.put("likedBy", FieldValue.arrayUnion(userId));
-        } else {
-            // Caso: Dar dislike
             if (hadLiked) {
-                // Si ya tenía like, lo removemos
+                // Quitar like si ya estaba activado
                 updates.put("likes", FieldValue.increment(-1));
                 updates.put("likedBy", FieldValue.arrayRemove(userId));
+            } else {
+                // Dar like
+                if (hadDisliked) {
+                    updates.put("dislikes", FieldValue.increment(-1));
+                    updates.put("dislikedBy", FieldValue.arrayRemove(userId));
+                }
+                updates.put("likes", FieldValue.increment(1));
+                updates.put("likedBy", FieldValue.arrayUnion(userId));
             }
-            updates.put("dislikes", FieldValue.increment(1));
-            updates.put("dislikedBy", FieldValue.arrayUnion(userId));
+        } else {
+            if (hadDisliked) {
+                // Quitar dislike si ya estaba activado
+                updates.put("dislikes", FieldValue.increment(-1));
+                updates.put("dislikedBy", FieldValue.arrayRemove(userId));
+            } else {
+                // Dar dislike
+                if (hadLiked) {
+                    updates.put("likes", FieldValue.increment(-1));
+                    updates.put("likedBy", FieldValue.arrayRemove(userId));
+                }
+                updates.put("dislikes", FieldValue.increment(1));
+                updates.put("dislikedBy", FieldValue.arrayUnion(userId));
+            }
         }
 
         db.collection("resenas").document(reviewId)
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    // Actualizar datos locales para reflejar cambios inmediatos
                     updateLocalResenaData(resena, isLike, hadLiked, hadDisliked);
 
-                    // Actualizar UI
-                    btnLike.setEnabled(!isLike);
-                    btnDislike.setEnabled(isLike);
-                    btnLike.setAlpha(isLike ? 0.5f : 1.0f);
-                    btnDislike.setAlpha(isLike ? 1.0f : 0.5f);
+
+                    boolean nowLiked = resena.containsKey("likedBy") && ((List<String>) resena.get("likedBy")).contains(userId);
+                    boolean nowDisliked = resena.containsKey("dislikedBy") && ((List<String>) resena.get("dislikedBy")).contains(userId);
+
+                    btnLike.setAlpha(nowLiked ? 0.5f : 1.0f);
+                    btnDislike.setAlpha(nowDisliked ? 0.5f : 1.0f);
 
                     notifyDataSetChanged();
                 })
@@ -193,41 +206,49 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
 
     private void updateLocalResenaData(Map<String, Object> resena, boolean isLike,
                                        boolean hadLiked, boolean hadDisliked) {
-        // Actualizar contadores locales
         int likes = getNumberAsInt(resena.get("likes"));
         int dislikes = getNumberAsInt(resena.get("dislikes"));
 
-        List<String> likedBy = resena.containsKey("likedBy") ? (List<String>) resena.get("likedBy") : new ArrayList<>();
-        List<String> dislikedBy = resena.containsKey("dislikedBy") ? (List<String>) resena.get("dislikedBy") : new ArrayList<>();
-
+        List<String> likedBy = (List<String>) resena.get("likedBy");
+        List<String> dislikedBy = (List<String>) resena.get("dislikedBy");
         String userId = currentUser.getUid();
 
         if (isLike) {
-            // Caso like
-            if (hadDisliked) {
-                dislikes--;
-                dislikedBy.remove(userId);
-            }
-            likes++;
-            if (!likedBy.contains(userId)) {
-                likedBy.add(userId);
-            }
-        } else {
-            // Caso dislike
             if (hadLiked) {
+                // Quitar like
                 likes--;
                 likedBy.remove(userId);
+            } else {
+                // Dar like
+                if (hadDisliked) {
+                    dislikes--;
+                    dislikedBy.remove(userId);
+                }
+                likes++;
+                if (!likedBy.contains(userId)) {
+                    likedBy.add(userId);
+                }
             }
-            dislikes++;
-            if (!dislikedBy.contains(userId)) {
-                dislikedBy.add(userId);
+        } else {
+            if (hadDisliked) {
+                // Quitar dislike
+                dislikes--;
+                dislikedBy.remove(userId);
+            } else {
+                // Dar dislike
+                if (hadLiked) {
+                    likes--;
+                    likedBy.remove(userId);
+                }
+                dislikes++;
+                if (!dislikedBy.contains(userId)) {
+                    dislikedBy.add(userId);
+                }
             }
         }
 
         resena.put("likes", likes);
         resena.put("dislikes", dislikes);
-        resena.put("likedBy", likedBy);
-        resena.put("dislikedBy", dislikedBy);
     }
 
     private String obtenerIdResena(Map<String, Object> resena) {
