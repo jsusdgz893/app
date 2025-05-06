@@ -60,6 +60,24 @@
         <!-- Aquí van los iconos sociales -->
     </LinearLayout>
 
+    <!-- Mensaje cuando no hay reseñas -->
+    <TextView
+        android:id="@+id/tvempty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:text="No hay reseñas disponibles"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/layoutSocial"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/CajaDeOpiniones"/>
+
     <!-- Caja de opiniones (RecyclerView) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/CajaDeOpiniones"
@@ -69,10 +87,8 @@
         android:layout_marginBottom="60dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layoutSocial"
-        app:layout_constraintVertical_bias="0.137" />
+        app:layout_constraintTop_toBottomOf="@id/tvempty"/>
 
     <!-- Botón Volver -->
     <Button

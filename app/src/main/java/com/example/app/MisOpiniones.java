@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -30,6 +32,7 @@ public class MisOpiniones extends AppCompatActivity implements ReseñaAdapter.On
     private FirebaseFirestore db;
     private ConstraintLayout cuadroEditar;
     private Button btnVolver;
+    private TextView tvNoResenas; // TextView para mostrar cuando no hay reseñas
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,23 +44,33 @@ public class MisOpiniones extends AppCompatActivity implements ReseñaAdapter.On
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Inicializar vistas
         mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        String userId = currentUser.getUid();
         db = FirebaseFirestore.getInstance();
         cuadroEditar = findViewById(R.id.CuadroEditar);
         recyclerView = findViewById(R.id.CajaDeOpiniones);
-
-        // Inicializar el adaptador y RecyclerView
-        adapter = new ReseñaAdapter(new ArrayList<>(),this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
+        tvNoResenas = findViewById(R.id.tvempty); // Asegúrate de tener este TextView en tu layout
+        btnVolver = findViewById(R.id.btnVolverOpiniones);
 
         // Obtener las reseñas del usuario
         getReseñasDelUsuario(reseñas -> {
-            // Actualiza la lista y el adaptador cuando las reseñas se carguen
             adapter.actualizarLista(reseñas);
+            // Mostrar u ocultar el mensaje según si hay reseñas
+            if (reseñas.isEmpty()) {
+                tvNoResenas.setVisibility(View.VISIBLE);
+                tvNoResenas.setText("No haz dejado ninguna reseña");
+                recyclerView.setVisibility(View.GONE);
+            } else {
+                tvNoResenas.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+            }
         });
+
+        // Configurar RecyclerView
+        adapter = new ReseñaAdapter(new ArrayList<>(), this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
 
         Button btnCerrar = cuadroEditar.findViewById(R.id.btnCancelar); // Asegúrate de tener un botón con este ID en el layout
 

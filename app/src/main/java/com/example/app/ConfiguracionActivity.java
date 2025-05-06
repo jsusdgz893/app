@@ -29,6 +29,7 @@ public class ConfiguracionActivity extends AppCompatActivity {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(this, Inicio.class));
             finish();
+            Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
         });
 
         // Eliminar cuenta

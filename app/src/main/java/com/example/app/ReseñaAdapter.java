@@ -1,6 +1,9 @@
 package com.example.app;
 
+import static com.google.common.collect.ComparisonChain.start;
+
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -91,9 +96,9 @@ public class ReseñaAdapter extends RecyclerView.Adapter<ReseñaAdapter.ReseñaV
                 return;
             }
 
-            new androidx.appcompat.app.AlertDialog.Builder(context)
+            new AlertDialog.Builder(context)
                     .setTitle("Confirmar eliminación")
-                    .setMessage("¿Estás seguro de que deseas eliminar la reseña de " + reseña.getIdProfesor() + "?")
+                    .setMessage("¿Estás seguro de que deseas eliminar la reseña de " + reseña.getProfesorNombre() + "?")
                     .setPositiveButton("Eliminar", (dialog, which) -> {
                         db.collection("resenas").document(idResenia)
                                 .delete()
@@ -102,6 +107,9 @@ public class ReseñaAdapter extends RecyclerView.Adapter<ReseñaAdapter.ReseñaV
                                     lista.remove(holder.getAdapterPosition());
                                     notifyItemRemoved(holder.getAdapterPosition());
                                     notifyItemRangeChanged(holder.getAdapterPosition(), lista.size());
+                                    if (lista.isEmpty()) {
+                                        Toast.makeText(context, "No hay más reseñas para mostrar", Toast.LENGTH_SHORT).show();
+                                    }
                                 })
                                 .addOnFailureListener(e -> {
                                     Toast.makeText(context, "Error al eliminar reseña: " + e.getMessage(), Toast.LENGTH_SHORT).show();
