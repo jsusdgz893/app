@@ -57,6 +57,9 @@ import android.widget.TextView;
 
 public class Principal extends AppCompatActivity {
 
+    private RecyclerView recyclerResenas;
+    private ResenaRecyclerAdapter resenaAdapter;
+
     private Button btnDescribeProfessor, btnCancelForm, btnSaveForm;
     private EditText editTextDescriptionProfessor;
     private RatingBar ratingBarProfessor;
@@ -66,8 +69,6 @@ public class Principal extends AppCompatActivity {
     private ActionBarDrawerToggle toggle;
     private NavigationView navigationView;
     private Toolbar toolbar;
-    private ListView listViewResenas;
-
     private TextView emptyResenas2, textViewLastReviews;
 
 
@@ -102,6 +103,9 @@ public class Principal extends AppCompatActivity {
         setContentView(R.layout.activity_principal);
         hideKeyboard(Principal.this);
 
+        recyclerResenas = findViewById(R.id.recyclerResenas);
+        recyclerResenas.setLayoutManager(new LinearLayoutManager(this));
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -114,7 +118,6 @@ public class Principal extends AppCompatActivity {
         autoCompleteMaterias = findViewById(R.id.autoCompleteMaterias);
         db = FirebaseFirestore.getInstance();
 
-        listViewResenas = findViewById(R.id.listViewResenas);
         cargarUltimasResena();
 
         loadProfesores();
@@ -201,9 +204,9 @@ public class Principal extends AppCompatActivity {
             searchView.setVisibility(View.VISIBLE);
             formDescribeProfessor.setVisibility(View.GONE);
             btnDescribeProfessor.setVisibility(View.VISIBLE);
-            listViewResenas.setVisibility(View.VISIBLE);
+            recyclerResenas.setVisibility(View.VISIBLE);
             textViewLastReviews.setVisibility(View.VISIBLE);
-            emptyResenas2.setVisibility(View.VISIBLE);
+            emptyResenas2.setVisibility(View.GONE);
         });
         //cargar materias del profesor seleccionado
         autoCompleteProfesores.setOnItemClickListener((parent, view, position, id) -> {
@@ -273,7 +276,7 @@ public class Principal extends AppCompatActivity {
                                                         btnDescribeProfessor.setVisibility(View.VISIBLE);
                                                         textViewLastReviews.setVisibility(View.VISIBLE);
                                                         emptyResenas2.setVisibility(View.GONE);
-                                                        listViewResenas.setVisibility(View.VISIBLE);
+                                                        recyclerResenas.setVisibility(View.VISIBLE);
                                                         Toast.makeText(this, "Reseña enviada con éxito", Toast.LENGTH_SHORT).show();
                                                     });
                                                 });
@@ -291,7 +294,6 @@ public class Principal extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Volver a cargar las reseñas cada vez que la actividad se reinicia
         cargarUltimasResena();
     }
 
@@ -303,7 +305,8 @@ public class Principal extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         if (task.getResult().isEmpty()) {
-                            listViewResenas.setEmptyView(findViewById(R.id.emptyResenas3));
+                            findViewById(R.id.emptyResenas3).setVisibility(View.VISIBLE);
+                            recyclerResenas.setVisibility(View.GONE);
                             return;
                         }
 
@@ -331,12 +334,6 @@ public class Principal extends AppCompatActivity {
                             resenas.add(resena);
                         }
 
-                        // Si no hay profesores, mostrar datos sin nombres
-                        if (profesorIds.isEmpty()) {
-                            ResenaAdapterPrincipal adapter = new ResenaAdapterPrincipal(this, resenas);
-                            listViewResenas.setAdapter(adapter);
-                            return;
-                        }
 
                         // Consulta batch de nombres de profesores
                         db.collection("profesores")
@@ -355,13 +352,10 @@ public class Principal extends AppCompatActivity {
                                             resena.put("nombre_profesor", profesorNombres.getOrDefault(profId, "Profesor desconocido"));
                                         }
 
-                                        // Actualizar UI
-                                        ResenaAdapterPrincipal adapter = new ResenaAdapterPrincipal(this, resenas);
-                                        listViewResenas.setAdapter(adapter);
-                                    } else {
-                                        // Si falla, mostrar reseñas sin nombres
-                                        ResenaAdapterPrincipal adapter = new ResenaAdapterPrincipal(this, resenas);
-                                        listViewResenas.setAdapter(adapter);
+                                        resenaAdapter = new ResenaRecyclerAdapter(resenas, Principal.this);
+                                        recyclerResenas.setAdapter(resenaAdapter);
+                                        recyclerResenas.setVisibility(View.VISIBLE);
+                                        findViewById(R.id.emptyResenas3).setVisibility(View.GONE);
                                     }
                                 });
                     } else {
@@ -418,7 +412,7 @@ public class Principal extends AppCompatActivity {
         formDescribeProfessor.setVisibility(View.VISIBLE);
         btnDescribeProfessor.setVisibility(View.GONE);
         searchView.setVisibility(View.INVISIBLE);
-        listViewResenas.setVisibility(View.GONE);
+        recyclerResenas.setVisibility(View.GONE);
         textViewLastReviews.setVisibility(View.GONE);
         emptyResenas2.setVisibility(View.GONE);
     }
@@ -456,7 +450,7 @@ public class Principal extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 textViewLastReviews = findViewById(R.id.textViewLastReviews);
                 textViewLastReviews.setVisibility(View.GONE);
-                listViewResenas.setVisibility(View.GONE);
+                recyclerResenas.setVisibility(View.GONE);
                 btnDescribeProfessor.setVisibility(View.GONE);
                 buscarProfesores(query);
                 return true;
@@ -467,7 +461,7 @@ public class Principal extends AppCompatActivity {
                 if (newText.isEmpty()) {
                     textViewLastReviews = findViewById(R.id.textViewLastReviews);
                     textViewLastReviews.setVisibility(View.VISIBLE);
-                    listViewResenas.setVisibility(View.VISIBLE);
+                    recyclerResenas.setVisibility(View.VISIBLE);
                     btnDescribeProfessor.setVisibility(View.VISIBLE);
                     recyclerResultadosBusqueda.setVisibility(View.GONE);
                 }

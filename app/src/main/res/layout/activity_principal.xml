@@ -160,13 +160,10 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <ListView
-                android:id="@+id/listViewResenas"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerResenas"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:divider="@color/white"
-                android:dividerHeight="1dp" />
+                android:layout_height="661dp" />
 
             <TextView
                 android:id="@+id/emptyResenas3"
@@ -185,9 +182,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:layout_alignParentBottom="true"
+                android:layout_gravity="center|fill_vertical"
                 android:layout_marginHorizontal="24dp"
-                android:layout_marginBottom="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:backgroundTint="#1E88E5"
                 android:elevation="4dp"
                 android:text="DESCRIBE A TU PROFESOR"

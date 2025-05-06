@@ -1,18 +1,18 @@
 package com.example.app;
 
 import android.content.Context;
-import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.app.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
@@ -23,90 +23,95 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
+public class ResenaRecyclerAdapter extends RecyclerView.Adapter<ResenaRecyclerAdapter.ResenaViewHolder> {
+    private final Context context;
+    private final List<Map<String, Object>> resenas;
     private final FirebaseFirestore db;
     private final FirebaseUser currentUser;
-
     private long lastClickTime = 0;
-    public ResenaAdapterPrincipal(Context context, List<Map<String, Object>> resenas) {
-        super(context, R.layout.item_resena_main, resenas);
-        db = FirebaseFirestore.getInstance();
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+    public ResenaRecyclerAdapter(List<Map<String, Object>> resenas, Context context) {
+        this.resenas = resenas;
+        this.db = FirebaseFirestore.getInstance();
+        this.currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        this.context = context; // Inicializa el contexto
     }
+
 
     @NonNull
     @Override
-    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-        if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_resena_main, parent, false);
+    public ResenaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_resena_main, parent, false);
+        return new ResenaViewHolder(view);
+    }
 
-            ImageButton btnLike = convertView.findViewById(R.id.btnLike);
-            ImageButton btnDislike = convertView.findViewById(R.id.btnDislike);
+    @Override
+    public void onBindViewHolder(@NonNull ResenaViewHolder holder, int position) {
 
-            btnLike.setEnabled(true);
-            btnDislike.setEnabled(true);
-        }
-
-        Map<String, Object> resena = getItem(position);
-        if (resena == null) {
-            return convertView;
-        }
+        Map<String, Object> resena = resenas.get(position);
 
         // Configurar vistas
-        TextView tvProfesor = convertView.findViewById(R.id.tvProfesorMain);
-        TextView tvMateria = convertView.findViewById(R.id.tvMateriaMain);
-        TextView tvCalificacion = convertView.findViewById(R.id.tvCalificacion);
-        TextView tvComentario = convertView.findViewById(R.id.tvComentario);
-        TextView textViewLikes = convertView.findViewById(R.id.textViewLikes);
-        TextView textViewDislikes = convertView.findViewById(R.id.textViewDislikes);
-        ImageButton btnLike = convertView.findViewById(R.id.btnLike);
-        ImageButton btnDislike = convertView.findViewById(R.id.btnDislike);
+        holder.tvProfesor.setText(resena.containsKey("nombre_profesor") ?
+                resena.get("nombre_profesor").toString() : "Profesor desconocido");
 
-        // Usar el nombre del profesor que ya viene en los datos
-        String nombreProfesor = resena.containsKey("nombre_profesor") ?
-                resena.get("nombre_profesor").toString() : "Profesor desconocido";
-        tvProfesor.setText(nombreProfesor);
-
-        tvMateria.setText(resena.containsKey("materia") ? resena.get("materia").toString() : "");
+        holder.tvMateria.setText(resena.containsKey("materia") ?
+                resena.get("materia").toString() : "");
 
         float calificacion = resena.containsKey("calificacion") ?
                 ((Number)resena.get("calificacion")).floatValue() : 0f;
-        tvCalificacion.setText(String.format("⭐ %.1f/5", calificacion));
+        holder.tvCalificacion.setText(String.format("⭐ %.1f/5", calificacion));
 
-        tvComentario.setText(resena.containsKey("comentario") ?
+        holder.tvComentario.setText(resena.containsKey("comentario") ?
                 String.format("\"%s\"", resena.get("comentario").toString()) : "");
 
+        holder.btnLike.setOnClickListener(null);
+        holder.btnDislike.setOnClickListener(null);
+
+        holder.btnDislike.setEnabled(true);
+        holder.btnLike.setEnabled(true);
 
         String idResena = obtenerIdResena(resena);
         String idUsuarioResena = resena.get("id_usuario").toString();
-
         boolean esCreador = currentUser != null && currentUser.getUid().equals(idUsuarioResena);
 
         int likes = getNumberAsInt(resena.get("likes"));
         int dislikes = getNumberAsInt(resena.get("dislikes"));
 
-
-        textViewLikes.setText(String.valueOf(likes));
-        textViewDislikes.setText(String.valueOf(dislikes));
-
+        holder.textViewLikes.setText(String.valueOf(likes));
+        holder.textViewDislikes.setText(String.valueOf(dislikes));
 
         if (esCreador) {
-            // Deshabilitar botones para el creador
-            btnLike.setEnabled(false);
-            btnDislike.setEnabled(false);
-            btnLike.setAlpha(0.3f);
-            btnDislike.setAlpha(0.3f);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                btnLike.setTooltipText("No puedes votar tu propia reseña");
-                btnDislike.setTooltipText("No puedes votar tu propia reseña");
-            }
+            holder.btnLike.setEnabled(false);
+            holder.btnDislike.setEnabled(false);
+            holder.btnLike.setAlpha(0.3f);
+            holder.btnDislike.setAlpha(0.3f);
         } else {
-            // Configurar para usuarios que no son el creador
-            setupVoteButtons(resena, btnLike, btnDislike, idResena);
+            setupVoteButtons(resena, holder.btnLike, holder.btnDislike, idResena);
         }
+    }
 
+    @Override
+    public int getItemCount() {
+        return resenas.size();
+    }
 
-        return convertView;
+    static class ResenaViewHolder extends RecyclerView.ViewHolder {
+        TextView tvProfesor, tvMateria, tvCalificacion, tvComentario;
+        TextView textViewLikes, textViewDislikes;
+        ImageButton btnLike, btnDislike;
+
+        public ResenaViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvProfesor = itemView.findViewById(R.id.tvProfesorMain);
+            tvMateria = itemView.findViewById(R.id.tvMateriaMain);
+            tvCalificacion = itemView.findViewById(R.id.tvCalificacion);
+            tvComentario = itemView.findViewById(R.id.tvComentario);
+            textViewLikes = itemView.findViewById(R.id.textViewLikes);
+            textViewDislikes = itemView.findViewById(R.id.textViewDislikes);
+            btnLike = itemView.findViewById(R.id.btnLike);
+            btnDislike = itemView.findViewById(R.id.btnDislike);
+        }
     }
 
     private void setupVoteButtons(Map<String, Object> resena, ImageButton btnLike,
@@ -117,6 +122,15 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
             return;
         }
 
+        if (resena == null) {
+            btnLike.setEnabled(false);
+            btnDislike.setEnabled(false);
+            return;
+        }
+
+        btnLike.setOnClickListener(null);
+        btnDislike.setOnClickListener(null);
+
         List<String> likedBy = (List<String>) resena.get("likedBy");
         List<String> dislikedBy = (List<String>) resena.get("dislikedBy");
 
@@ -126,7 +140,7 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
         btnLike.setAlpha(hasLiked ? 0.5f : 1.0f);
         btnDislike.setAlpha(hasDisliked ? 0.5f : 1.0f);
 
-        // Configurar listeners solo si no es el creador
+        // Configurar nuevos listeners
         btnLike.setOnClickListener(v -> handleVoteClick(reviewId, resena, true, btnLike, btnDislike));
         btnDislike.setOnClickListener(v -> handleVoteClick(reviewId, resena, false, btnLike, btnDislike));
     }
@@ -141,7 +155,7 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
         lastClickTime = System.currentTimeMillis();
 
         if (currentUser == null || reviewId.isEmpty()) {
-            Toast.makeText(getContext(), "Debes iniciar sesión para votar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Debes iniciar sesión para votar", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -199,7 +213,7 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
                     notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error al registrar voto", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Error al registrar voto", Toast.LENGTH_SHORT).show();
                     Log.e("ResenaAdapter", "Error al actualizar voto", e);
                 });
     }
@@ -270,4 +284,5 @@ public class ResenaAdapterPrincipal extends ArrayAdapter<Map<String, Object>> {
         }
         return 0;
     }
+
 }
